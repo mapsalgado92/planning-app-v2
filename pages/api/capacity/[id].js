@@ -10,9 +10,7 @@ HEADER: authorization base 64 encoded
 */
 
 export default async function handler(req, res) {
-  const { query, method, body, headers } = req
-
-  console.log(query, method, body, headers)
+  const { query, method } = req
 
   const { client, db } = await connectToDatabase()
 

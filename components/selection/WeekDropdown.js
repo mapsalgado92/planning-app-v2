@@ -29,11 +29,11 @@ const WeekDropdown = ({
           }
         }}
         value={
-          selected ? JSON.stringify(selected) : `Select a ${label || fieldName}`
+          selected ? JSON.stringify(selected) : `Select ${label || fieldName}`
         }
       >
         {!selected && (
-          <option value={null}>{`Select a ${label || fieldName}`}</option>
+          <option value={null}>{`Select ${label || fieldName}`}</option>
         )}
         {weekRange &&
           weekRange.map((item, index) => (

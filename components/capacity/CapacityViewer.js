@@ -8,7 +8,7 @@ const CapacityViewer = ({ capacity, fields, weeks }) => {
     setIsMounted(true)
   }, [])
   return (
-    <div className="columns is-gapless is-size-7">
+    <div className="columns is-gapless is-size-7 is-mobile">
       <div className="column is-narrow table-container has-text-right">
         <table className="table">
           <thead>
@@ -24,8 +24,9 @@ const CapacityViewer = ({ capacity, fields, weeks }) => {
           <tbody>
             {fields &&
               fields.map((field) => (
-                <tr>
+                <tr key={"weekly-header-row-" + field.internal}>
                   <th
+                    key={"field-" + field.internal}
                     className={
                       field.type === "capacity" ? "has-text-danger" : ""
                     }
@@ -43,9 +44,12 @@ const CapacityViewer = ({ capacity, fields, weeks }) => {
             <tr>
               {capacity &&
                 capacity.map((weekly) => {
-                  console.log(weekly)
                   return (
-                    <th className="is-dark" style={{ whiteSpace: "nowrap" }}>
+                    <th
+                      key={"weekly-head-" + weekly.week.code}
+                      className="is-dark"
+                      style={{ whiteSpace: "nowrap" }}
+                    >
                       <div className="mx-auto">
                         {isMounted && (
                           <ReactTooltip
@@ -75,9 +79,12 @@ const CapacityViewer = ({ capacity, fields, weeks }) => {
             <tr>
               {capacity &&
                 capacity.map((weekly) => {
-                  console.log(weekly)
                   return (
-                    <th className="is-dark" style={{ whiteSpace: "nowrap" }}>
+                    <th
+                      key={"weekly-foot-" + weekly.week.code}
+                      className="is-dark"
+                      style={{ whiteSpace: "nowrap" }}
+                    >
                       {weekly.firstDate}
                     </th>
                   )
@@ -87,10 +94,13 @@ const CapacityViewer = ({ capacity, fields, weeks }) => {
           <tbody>
             {fields &&
               fields.map((field) => (
-                <tr>
+                <tr key={"weekly-body-row-" + field.internal}>
                   {capacity &&
                     capacity.map((weekly) => (
-                      <td style={{ whiteSpace: "nowrap", textAlign: "center" }}>
+                      <td
+                        key={"weekly-body-" + weekly.week.code}
+                        style={{ whiteSpace: "nowrap", textAlign: "center" }}
+                      >
                         {weekly[field.internal] ? (
                           Math.round(weekly[field.internal] * 1000) / 1000
                         ) : weekly[field.internal] === 0 ? (

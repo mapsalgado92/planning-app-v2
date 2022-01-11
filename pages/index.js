@@ -5,7 +5,7 @@ export default function Home({ isConnected }) {
   return (
     <>
       <Head>
-        <title>Sitel Planner | Home</title>
+        <title>Planning App | Home</title>
       </Head>
       <div className="mt-auto mb-auto">
         <div className="columns">

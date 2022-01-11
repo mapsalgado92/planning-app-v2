@@ -39,13 +39,9 @@ const StructureDropdown = ({
             callback(form, json)
           }
         }}
-        value={
-          selected ? JSON.stringify(selected) : `Select a ${structureName}`
-        }
+        value={selected ? JSON.stringify(selected) : `Select ${structureName}`}
       >
-        {!selected && (
-          <option value={null}>{`Select a ${structureName}`}</option>
-        )}
+        {!selected && <option value={null}>{`Select ${structureName}`}</option>}
         {data &&
           data.map((item, index) => (
             <option key={"selection-" + item._id} value={JSON.stringify(item)}>
