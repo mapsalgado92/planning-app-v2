@@ -2,7 +2,7 @@ import { useState, useEffect } from "react"
 import ReactTooltip from "react-tooltip"
 import { FaExclamationCircle } from "react-icons/fa"
 
-const CapacityViewer = ({ capacity, fields, weeks, selectWeek }) => {
+const CapacityViewer = ({ capacity, fields, selectWeek }) => {
   const [isMounted, setIsMounted] = useState(false)
   useEffect(() => {
     setIsMounted(true)

@@ -56,6 +56,9 @@ const Header = () => {
                 <Link href="/capacity">
                   <a className="navbar-item">Capacity</a>
                 </Link>
+                <Link href="/staffing">
+                  <a className="navbar-item">Staffing</a>
+                </Link>
               </div>
             </div>
           </div>
