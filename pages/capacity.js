@@ -248,7 +248,9 @@ export default function Capacity() {
             <CapacityViewer
               capacity={capacity.get(weekRange)}
               weeks={weeks}
-              fields={data.fields.sort((a, b) => parseInt(a) - parseInt(b))}
+              fields={data.fields.sort(
+                (a, b) => parseInt(a.order) - parseInt(b.order)
+              )}
             />
 
             <br />

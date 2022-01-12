@@ -21,6 +21,7 @@ export default async function handler(req, res) {
         output[selected[i]] = await db
           .collection(selected[i])
           .find({})
+          .sort({ name: 1 })
           .toArray()
       }
       res.status(200).json({
