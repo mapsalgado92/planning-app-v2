@@ -1,5 +1,5 @@
 import { useState } from "react"
-import pick from "lodash/pick"
+import _ from "lodash"
 /**
  * @props
  **/
@@ -48,8 +48,7 @@ const useCapacity = () => {
       ? weekRange.map((week, index) => {
           return fields
             ? {
-                week,
-                ...pick(capacity[firstIndex + index], fields),
+                ..._.pick(capacity[firstIndex + index], fields),
               }
             : {
                 ...capacity[firstIndex + index],

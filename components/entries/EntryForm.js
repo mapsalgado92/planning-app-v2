@@ -138,7 +138,11 @@ const EntriyForm = ({ selection, week }) => {
                   <p className="control">
                     <input
                       readOnly={true}
-                      className="input is-rounded is-small has-background-dark has-text-light"
+                      className={`input is-rounded is-small has-text-light ${
+                        entry && entry[field]
+                          ? "has-background-info"
+                          : "has-background-grey-lighter"
+                      }`}
                       aria-label={field}
                       value={(entry && entry[field]) || "none"}
                     />
@@ -171,7 +175,11 @@ const EntriyForm = ({ selection, week }) => {
                   <p className="control">
                     <input
                       readOnly={true}
-                      className="input is-rounded is-small has-background-dark has-text-light"
+                      className={`input is-rounded is-small has-text-light ${
+                        entry && entry[field]
+                          ? "has-background-info"
+                          : "has-background-grey-lighter"
+                      }`}
                       aria-label={field}
                       value={(entry && entry[field]) || "none"}
                     />
@@ -204,7 +212,11 @@ const EntriyForm = ({ selection, week }) => {
                   <p className="control">
                     <input
                       readOnly={true}
-                      className="input is-rounded is-small has-background-dark has-text-light"
+                      className={`input is-rounded is-small has-text-light ${
+                        entry && entry[field]
+                          ? "has-background-info"
+                          : "has-background-grey-lighter"
+                      }`}
                       aria-label={field}
                       value={(entry && entry[field]) || "none"}
                     />
@@ -237,7 +249,11 @@ const EntriyForm = ({ selection, week }) => {
                   <p className="control">
                     <input
                       readOnly={true}
-                      className="input is-rounded is-small has-background-dark has-text-light"
+                      className={`input is-rounded is-small has-text-light ${
+                        entry && entry[field]
+                          ? "has-background-info"
+                          : "has-background-grey-lighter"
+                      }`}
                       aria-label={field}
                       value={(entry && entry[field]) || "none"}
                     />
@@ -270,7 +286,11 @@ const EntriyForm = ({ selection, week }) => {
                   <p className="control">
                     <input
                       readOnly={true}
-                      className="input is-rounded is-small has-background-dark has-text-light"
+                      className={`input is-rounded is-small has-text-light ${
+                        entry && entry[field]
+                          ? "has-background-info"
+                          : "has-background-grey-lighter"
+                      }`}
                       aria-label={field}
                       value={(entry && entry[field]) || "none"}
                     />
@@ -298,7 +318,7 @@ const EntriyForm = ({ selection, week }) => {
                 <div className="column">
                   <textarea
                     readOnly={true}
-                    className="textarea is-fullwidth has-background-dark has-text-light"
+                    className="textarea is-fullwidth has-background-grey-lighter has-text-light"
                     aria-label={"commeent-locked"}
                     value={(entry && entry["Comment"]) || "none"}
                   />
@@ -328,7 +348,13 @@ const EntriyForm = ({ selection, week }) => {
                 onClick={handleSubmit}
                 disabled={!auth.permission(2)}
               >
-                Submit {!auth.permission(2) && <FaLock className="mx-1" />}
+                {auth.permission(2) ? (
+                  "SUBMIT"
+                ) : (
+                  <span>
+                    <FaLock className="mx-1" /> Unauthorized Access
+                  </span>
+                )}
               </button>
             </div>
           </div>

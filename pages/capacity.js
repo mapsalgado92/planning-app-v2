@@ -12,7 +12,6 @@ import WeekDropdown from "../components/selection/WeekDropdown"
 import CapacityViewer from "../components/capacity/CapacityViewer"
 import TotalPercentageChart from "../components/capacity/TotalPercentageChart"
 import CapacityDataGrid from "../components/capacity/CapacityDataGrid"
-import EntriyForm from "../components/entries/EntryForm"
 import EntriesModal from "../components/entries/EntriesModal"
 
 const selectionFields = [

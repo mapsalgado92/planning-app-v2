@@ -6,7 +6,6 @@ import Head from "next/head"
 
 import { AuthProvider } from "../contexts/authContext"
 import PageLayout from "../layout/pageLayout"
-import { WeeksProvider } from "../contexts/weeksContext"
 
 function MyApp({ Component, pageProps }) {
   return (
@@ -25,11 +24,9 @@ function MyApp({ Component, pageProps }) {
       </Head>
 
       <AuthProvider>
-        <WeeksProvider>
-          <PageLayout>
-            <Component {...pageProps} />
-          </PageLayout>
-        </WeeksProvider>
+        <PageLayout>
+          <Component {...pageProps} />
+        </PageLayout>
       </AuthProvider>
     </>
   )
