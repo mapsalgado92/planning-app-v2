@@ -1,5 +1,5 @@
 import Head from "next/head"
-import { useState } from "react/cjs/react.development"
+import { useState } from "react"
 import LobManagement from "../components/management/LobManagement"
 import ProjectManagement from "../components/management/ProjectManagement"
 import CapPlanManagement from "../components/management/CapPlanManagement"

@@ -1,5 +1,5 @@
 import Head from "next/head"
-import { useState } from "react/cjs/react.development"
+import { useState } from "react"
 import useData from "../hooks/useData"
 import useForm from "../hooks/useForm"
 import StructureDropdown from "../components/selection/StructureDropdown"
