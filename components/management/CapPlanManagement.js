@@ -306,7 +306,7 @@ const CapPlanManagement = ({ data }) => {
                 form={form}
                 data={data && data.projects}
                 disabled={false}
-                reset={["lob"]}
+                reset={["lob", "capPlan"]}
                 callback={(f) => {
                   f.resetAll()
                 }}
@@ -315,6 +315,7 @@ const CapPlanManagement = ({ data }) => {
                 structureName="lob"
                 selection={selection}
                 form={form}
+                reset={["capPlan"]}
                 data={
                   data &&
                   selection.get("project") &&
