@@ -2,8 +2,9 @@ import { useState, useEffect } from "react"
 import ReactTooltip from "react-tooltip"
 import { FaExclamationCircle } from "react-icons/fa"
 
-const CapacityViewer = ({ capacity, fields, selectWeek }) => {
+const CapacityViewer = ({ capacity, fields, currentWeek, withStaff }) => {
   const [isMounted, setIsMounted] = useState(false)
+
   useEffect(() => {
     setIsMounted(true)
   }, [])
@@ -23,18 +24,24 @@ const CapacityViewer = ({ capacity, fields, selectWeek }) => {
           </tfoot>
           <tbody>
             {fields &&
-              fields.map((field) => (
-                <tr key={"weekly-header-row-" + field.internal}>
-                  <th
-                    key={"field-" + field.internal}
-                    className={
-                      field.type === "capacity" ? "has-text-danger" : ""
-                    }
-                  >
-                    {field.external + " ->"}
-                  </th>
-                </tr>
-              ))}
+              fields
+                .filter((field) => (withStaff ? 1 : field.order < 1000))
+                .map((field) => (
+                  <tr key={"weekly-header-row-" + field.internal}>
+                    <th
+                      key={"field-" + field.internal}
+                      className={
+                        field.type === "capacity"
+                          ? "has-text-danger"
+                          : field.type === "staffing"
+                          ? "has-text-link"
+                          : ""
+                      }
+                    >
+                      {field.external + " ->"}
+                    </th>
+                  </tr>
+                ))}
           </tbody>
         </table>
       </div>
@@ -47,7 +54,11 @@ const CapacityViewer = ({ capacity, fields, selectWeek }) => {
                   return (
                     <th
                       key={"weekly-head-" + weekly.week.code}
-                      className="is-dark"
+                      className={
+                        weekly.week.code === currentWeek.code
+                          ? "is-danger"
+                          : "is-dark"
+                      }
                       style={{ whiteSpace: "nowrap" }}
                     >
                       <div className="mx-auto">
@@ -60,8 +71,8 @@ const CapacityViewer = ({ capacity, fields, selectWeek }) => {
                         )}
                         {weekly.firstDate}
                         <FaExclamationCircle
-                          className={`ml-2 ${
-                            weekly.Comment ? "has-text-white" : "has-text-grey"
+                          className={`ml-1 ${
+                            weekly.Comment ? "has-text-warning" : "is-hidden"
                           }`}
                           data-tip={
                             weekly.Comment &&
@@ -93,25 +104,27 @@ const CapacityViewer = ({ capacity, fields, selectWeek }) => {
           </tfoot>
           <tbody>
             {fields &&
-              fields.map((field) => (
-                <tr key={"weekly-body-row-" + field.internal}>
-                  {capacity &&
-                    capacity.map((weekly) => (
-                      <td
-                        key={"weekly-body-" + weekly.week.code}
-                        style={{ whiteSpace: "nowrap", textAlign: "center" }}
-                      >
-                        {weekly[field.internal] ? (
-                          Math.round(weekly[field.internal] * 1000) / 1000
-                        ) : weekly[field.internal] === 0 ? (
-                          <span className="has-text-primary">0</span>
-                        ) : (
-                          <span className="has-text-light">#</span>
-                        )}
-                      </td>
-                    ))}
-                </tr>
-              ))}
+              fields
+                .filter((field) => (withStaff ? 1 : field.order < 1000))
+                .map((field) => (
+                  <tr key={"weekly-body-row-" + field.internal}>
+                    {capacity &&
+                      capacity.map((weekly) => (
+                        <td
+                          key={"weekly-body-" + weekly.week.code}
+                          style={{ whiteSpace: "nowrap", textAlign: "center" }}
+                        >
+                          {weekly[field.internal] ? (
+                            Math.round(weekly[field.internal] * 1000) / 1000
+                          ) : weekly[field.internal] === 0 ? (
+                            <span className="has-text-primary">0</span>
+                          ) : (
+                            <span className="has-text-light">#</span>
+                          )}
+                        </td>
+                      ))}
+                  </tr>
+                ))}
           </tbody>
         </table>
       </div>

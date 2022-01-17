@@ -41,6 +41,7 @@ const entrySelectionFields = [
 export default function Capacity() {
   const [weekRange, setWeekRange] = useState([])
   const [active, setActive] = useState(false)
+  const [withStaff, setWithStaff] = useState(false)
 
   const data = useData(["projects", "lobs", "capPlans", "languages", "fields"])
 
@@ -64,6 +65,9 @@ export default function Capacity() {
   }
 
   const handleToggle = () => {
+    if (active && selection.get("fromWeek") && selection.get("toWeek")) {
+      handleGenerate()
+    }
     setActive(!active)
   }
 
@@ -176,8 +180,8 @@ export default function Capacity() {
                   onClick={() =>
                     selection.setMany({
                       ...selection.getForm(),
-                      fromWeek: weeks.getWeekRelative(parseFloat("-12")),
-                      toWeek: weeks.getWeekRelative(parseFloat("12")),
+                      fromWeek: weeks.getWeekRelative(parseFloat("-8")),
+                      toWeek: weeks.getWeekRelative(parseFloat("16")),
                     })
                   }
                 >
@@ -235,22 +239,34 @@ export default function Capacity() {
         {capacity.isGenerated() && (
           <div id={"cap-viewer"}>
             <br />
-            <h2 className="is-size-5">
-              Capacity Viewer{" "}
-              <a className="tag ml-1 is-rounded" href={"#charts"}>
+            <div className="is-size-5 is-flex ">
+              <label className="label is-size-5">Capacity Viewer</label>
+
+              <a className="tag ml-3 is-rounded" href={"#charts"}>
                 charts <FaExternalLinkAlt className="ml-1" />
               </a>
-              <a className="tag ml-1 is-rounded" href={"#grid"}>
+              <a className="tag ml-3 is-rounded" href={"#grid"}>
                 grid <FaExternalLinkAlt className="ml-1" />
               </a>
-            </h2>
+
+              <button
+                className={`button is-small is-rounded ml-auto ${
+                  withStaff ? "is-danger" : "is-primary"
+                }`}
+                onClick={() => setWithStaff(!withStaff)}
+              >
+                Toggle Staffing
+              </button>
+            </div>
+
             <br />
             <CapacityViewer
               capacity={capacity.get(weekRange)}
-              weeks={weeks}
+              currentWeek={weeks.getWeekRelative("-1")}
               fields={data.fields.sort(
                 (a, b) => parseInt(a.order) - parseInt(b.order)
               )}
+              withStaff={withStaff}
             />
 
             <br />

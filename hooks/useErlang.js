@@ -1,7 +1,12 @@
 import { useState } from "react"
 
-const useErlang = ({ interval }) => {
-  const [interval, setInterval] = useState(interval || 900)
+const useErlang = () => {
+  const [interval, setInterval] = useState(900)
+
+  const [out, setOut] = useState({
+    requirements: [],
+    results: [],
+  })
 
   const updateInterval = (newInterval) => {
     setInterval(newInterval)
@@ -23,19 +28,24 @@ const useErlang = ({ interval }) => {
       message,
     }
    */
-  const calculateErlang = (vol, n, aht, targets) => {
+  const calculateErlang = (vol, n, aht, targets, shrink) => {
     const powOverFact = (pow, exp, fact) => {
       let prod = 1
       let nExp = exp
       let nFact = fact
       while (nExp > 0 || nFact > 1) {
+        //Calc Stage Prod
         if (nExp === 0) {
           prod *= 1 / nFact
-        } else {
+        } else if (nExp > 1) {
           prod *= pow / nFact
         }
+
+        //Decrement NFACT & NEXP
         nExp--
         nFact--
+
+        //Adjust NFACT & NEXP
         if (nExp < 0) {
           nExp = 0
         }
@@ -52,6 +62,8 @@ const useErlang = ({ interval }) => {
     }
 
     let a = (vol * aht) / interval
+
+    console.log("A", a)
 
     let x = powOverFact(a, n, n) * (n / (n - a))
 
@@ -111,7 +123,7 @@ const useErlang = ({ interval }) => {
 
     return {
       volumes: vol,
-      agents: n,
+      agents: shrink ? n / (1 - shrink) : n,
       aht: aht,
       sl: sl,
       asa: asa,
@@ -147,23 +159,67 @@ const useErlang = ({ interval }) => {
     let required = {}
 
     for (let n = firstEstimate; n < 1000; n++) {
-      required = calculateErlang(vol, n, aht, targets)
+      required = calculateErlang(vol, n, aht, targets, shrink)
+
       if (required.acceptable) {
-        return shrink ? required / (1 - shrink) : required
+        break
       } else {
         console.log("For ", n, " -> ", required.message)
       }
     }
+
+    return required
   }
 
-  const generateResults = (distros, staffing, vol, aht) => {}
+  const generateResults = ({ distros, staffing, vol, aht, abs, aux }) => {}
 
-  const generateRequirements = (distros, vol, aht, targets) => {}
+  const generateRequirements = ({
+    distros,
+    vol,
+    aht,
+    targets,
+    abs,
+    off,
+    aux,
+    absFromTotal,
+  }) => {
+    let output = distros.map((entry) => {
+      let usedAux = entry.auxDist ? entry.auxDist : aux
+      let usedAbs = absFromTotal ? abs : 1 - abs * (1 - off)
+
+      let scheduledShrink =
+        1 - ((1 - usedAux) * (1 - usedAbs - off)) / (1 - off)
+
+      let totalShrink = 1 - (1 - usedAux) * (1 - usedAbs - off)
+
+      return {
+        ...entry,
+        scheduled: getRequired(
+          entry.vDist * vol,
+          entry.ahtDist * aht,
+          scheduledShrink,
+          targets
+        ),
+        total: getRequired(
+          entry.vDist * vol,
+          entry.ahtDist * aht,
+          totalShrink,
+          targets
+        ),
+      }
+    })
+
+    setOut({ ...out, requirements: output })
+
+    return output
+  }
 
   return {
     updateInterval,
     calculateErlang,
     getRequired,
+    generateRequirements,
+    out,
   }
 }
 

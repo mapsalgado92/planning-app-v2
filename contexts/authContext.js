@@ -42,9 +42,9 @@ export const AuthProvider = ({ children }) => {
               data.user.session.expires - new Date().getTime() / 3600000
             ),
           })
-        alert(data.message)
+        console.log(data.message)
       })
-      .catch((err) => alert("Something went wrong!"))
+      .catch((err) => console.log("Something went wrong!"))
   }
 
   const logout = () => {

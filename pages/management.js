@@ -6,6 +6,7 @@ import CapPlanManagement from "../components/management/CapPlanManagement"
 import { useAuth } from "../contexts/authContext"
 import useData from "../hooks/useData"
 import { FaLock } from "react-icons/fa"
+import StaffingManagement from "../components/management/StaffingManagement"
 
 export default function Management() {
   const [screen, setScreen] = useState("projects")
@@ -44,7 +45,12 @@ export default function Management() {
               >
                 Cap Plans
               </a>
-              <a className=" panel-block ">Staffing</a>
+              <a
+                className=" panel-block "
+                onClick={() => setScreen("staffing")}
+              >
+                Staffing
+              </a>
             </div>
           </div>
           <div className="column">
@@ -59,8 +65,10 @@ export default function Management() {
               <ProjectManagement data={data} />
             ) : screen === "lobs" ? (
               <LobManagement data={data} />
-            ) : (
+            ) : screen === "capPlans" ? (
               <CapPlanManagement data={data} />
+            ) : (
+              <StaffingManagement data={data} />
             )}
           </div>
         </div>

@@ -13,13 +13,13 @@ const useCapacity = () => {
       fetch(`/api/capacity/${capPlan._id}`)
         .then((response) => response.json())
         .then((data) => {
-          alert(data.message)
+          console.log(data.message)
           setCapacity(data.capacity)
           setGenerated(true)
         })
-        .catch((err) => alert(err))
+        .catch((err) => console.log(err))
     } else {
-      alert("No initial data!")
+      console.log("No initial data!")
     }
     return
   }

@@ -81,10 +81,10 @@ const CapPlanManagement = ({ data }) => {
         })
           .then((response) => response.json())
           .then((data) => {
-            alert(data.message)
+            console.log(data.message)
             form.resetAll()
           })
-          .catch((err) => alert(err))
+          .catch((err) => console.log(err))
         break
 
       case "EDIT":
@@ -103,10 +103,10 @@ const CapPlanManagement = ({ data }) => {
         )
           .then((response) => response.json())
           .then((data) => {
-            alert(data.message)
+            console.log(data.message)
             form.resetAll()
           })
-          .catch((err) => alert(err))
+          .catch((err) => console.log(err))
         break
 
       case "REMOVE":
@@ -124,10 +124,10 @@ const CapPlanManagement = ({ data }) => {
         )
           .then((response) => response.json())
           .then((data) => {
-            alert(data.message)
+            console.log(data.message)
             form.resetAll()
           })
-          .catch((err) => alert(err))
+          .catch((err) => console.log(err))
         break
     }
     selection.resetOne("capPlan")
@@ -268,7 +268,6 @@ const CapPlanManagement = ({ data }) => {
             <div className="column is-12 ">
               <div className="control">
                 <label className="label">
-                  Active
                   <input
                     type="checkbox"
                     className="mx-2"
@@ -277,6 +276,7 @@ const CapPlanManagement = ({ data }) => {
                       form.set("active", !form.get("active"))
                     }}
                   ></input>
+                  Active
                 </label>
               </div>
             </div>
@@ -394,7 +394,6 @@ const CapPlanManagement = ({ data }) => {
             <div className="column is-12 ">
               <div className="control">
                 <label className="label">
-                  Active
                   <input
                     type="checkbox"
                     className="mx-2"
@@ -403,6 +402,7 @@ const CapPlanManagement = ({ data }) => {
                       form.set("active", !form.get("active"))
                     }}
                   ></input>
+                  Active
                 </label>
               </div>
             </div>

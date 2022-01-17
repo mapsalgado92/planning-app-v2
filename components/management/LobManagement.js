@@ -69,10 +69,10 @@ const LobManagement = ({ data }) => {
         })
           .then((response) => response.json())
           .then((data) => {
-            alert(data.message)
+            console.log(data.message)
             form.resetAll()
           })
-          .catch((err) => alert(err))
+          .catch((err) => console.log(err))
         break
 
       case "EDIT":
@@ -91,10 +91,10 @@ const LobManagement = ({ data }) => {
         )
           .then((response) => response.json())
           .then((data) => {
-            alert(data.message)
+            console.log(data.message)
             form.resetAll()
           })
-          .catch((err) => alert(err))
+          .catch((err) => console.log(err))
         break
 
       case "REMOVE":
@@ -112,10 +112,10 @@ const LobManagement = ({ data }) => {
         )
           .then((response) => response.json())
           .then((data) => {
-            alert(data.message)
+            console.log(data.message)
             form.resetAll()
           })
-          .catch((err) => alert(err))
+          .catch((err) => console.log(err))
         break
     }
     selection.resetOne("lob")

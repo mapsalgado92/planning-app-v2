@@ -55,8 +55,9 @@ export default async function handler(req, res) {
       break
     case "PUT":
       if (verification.verified && verification.permission <= 2 && target) {
+        console.log("WILL UPDATE", payload)
         let update =
-          payload && payload.name && target
+          payload && payload && target
             ? await db
                 .collection("capPlans")
                 .updateOne({ _id: ObjectId(target) }, { $set: payload })

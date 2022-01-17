@@ -20,13 +20,17 @@ export default async function handler(req, res) {
   if (method === "POST") {
     if (verification.verified && verification.permission <= 2) {
       if (payload) {
-        let id = payload._id
         delete payload._id
+
         const update = { $set: payload }
         const options = { upsert: true }
         let response = await db
           .collection("capEntries")
-          .updateOne(id ? { _id: ObjectId(id) } : {}, update, options)
+          .updateOne(
+            { capPlan: payload.capPlan, week: payload.week },
+            update,
+            options
+          )
         res.status(200).json({
           message: `Updated Entry in Database!`,
           inserted: payload,

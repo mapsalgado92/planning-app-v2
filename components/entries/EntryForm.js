@@ -21,17 +21,11 @@ const trainingFields = [
   "ocpWeeks",
 ]
 
-const targetFields = ["billable", "requirements", "tgAHT", "tgSL"]
+const targetFields = ["billable", "forecasted", "budget", "required"]
 
-const forecastFields = [
-  "fcAttrition",
-  "fcTrAttrition",
-  "fcVolumes",
-  "fcAHT",
-  "fcRequirements",
-]
+const staffingFields = ["pAHT", "pVolumes", "pSL", "pTT", "pOccupancy", "pASA"]
 
-const actualFields = ["actVolumes", "actAHT", "actRequirements"]
+const actualFields = ["actAHT", "actVolumes", "actOff", "actAbs", "actAux"]
 
 const EntriyForm = ({ selection, week }) => {
   const [entry, setEntry] = useState(null)
@@ -42,7 +36,6 @@ const EntriyForm = ({ selection, week }) => {
 
   useEffect(() => {
     const fetchEntry = async () => {
-      console.log("WILL FETCH")
       let fetched = await fetch(
         `api/data/find/capEntries?capPlan=${
           selection.get("capPlan")._id
@@ -63,6 +56,8 @@ const EntriyForm = ({ selection, week }) => {
           entries.map((entry) => entry.id)
         )
       } else if (entries.length === 0) {
+        setFormInfo({})
+        setEntry(null)
         console.log("No entry found")
       }
       setLoaded(true)
@@ -113,7 +108,7 @@ const EntriyForm = ({ selection, week }) => {
     })
       .then((res) => res.json())
       .then((fetched) => {
-        alert(fetched.message)
+        console.log(fetched.message)
         setEntry(newEntry)
         setFormInfo({ Comment: newEntry["Comment"] })
       })
@@ -127,11 +122,11 @@ const EntriyForm = ({ selection, week }) => {
       <div>
         <form className="is-size-7">
           <label>HEADCOUNT</label>
-          <div className="columns is-multiline is-mobile mb-0">
+          <div className="columns is-multiline is-mobile pt-2">
             {headcountFields.map((field) => (
               <div
                 key={`Col-${field}`}
-                className="column is-6-mobile is-2 pb-0 pt-2"
+                className="column is-6-mobile is-2 py-0"
               >
                 <label>{field}</label>
                 <div className="field has-addons">
@@ -164,11 +159,11 @@ const EntriyForm = ({ selection, week }) => {
             ))}
           </div>
           <label>TRAINING</label>
-          <div className="columns is-multiline is-mobile mb-0">
+          <div className="columns is-multiline is-mobile pt-2">
             {trainingFields.map((field) => (
               <div
                 key={`Col-${field}`}
-                className="column is-6-mobile is-2  pb-0 pt-2"
+                className="column is-6-mobile is-2 py-0"
               >
                 <label>{field}</label>
                 <div className="field has-addons">
@@ -200,12 +195,12 @@ const EntriyForm = ({ selection, week }) => {
               </div>
             ))}
           </div>
-          <label>TARGET</label>
-          <div className="columns is-multiline is-mobile mb-0">
+          <label>TARGETS</label>
+          <div className="columns is-multiline is-mobile pt-2">
             {targetFields.map((field) => (
               <div
                 key={`Col-${field}`}
-                className="column is-6-mobile is-2  pb-0 pt-2"
+                className="column is-6-mobile is-2 py-0"
               >
                 <label>{field}</label>
                 <div className="field has-addons">
@@ -237,12 +232,12 @@ const EntriyForm = ({ selection, week }) => {
               </div>
             ))}
           </div>
-          <label>FORECAST</label>
-          <div className="columns is-multiline is-mobile mb-0">
-            {forecastFields.map((field) => (
+          <label>STAFFING</label>
+          <div className="columns is-multiline is-mobile pt-2">
+            {staffingFields.map((field) => (
               <div
                 key={`Col-${field}`}
-                className="column is-6-mobile is-2  pb-0 pt-2"
+                className="column is-6-mobile is-2 py-0"
               >
                 <label>{field}</label>
                 <div className="field has-addons">
@@ -274,12 +269,12 @@ const EntriyForm = ({ selection, week }) => {
               </div>
             ))}
           </div>
-          <label>ACTUAL</label>
-          <div className="columns is-multiline is-mobile mb-0">
+          <label>ACTUALS</label>
+          <div className="columns is-multiline is-mobile pt-2">
             {actualFields.map((field) => (
               <div
                 key={`Col-${field}`}
-                className="column is-6-mobile is-2   pb-0 pt-2"
+                className="column is-6-mobile is-2 py-0"
               >
                 <label>{field}</label>
                 <div className="field has-addons">
@@ -346,7 +341,7 @@ const EntriyForm = ({ selection, week }) => {
                   auth.permission(2) ? "is-primary" : "is-danger"
                 }`}
                 onClick={handleSubmit}
-                disabled={!auth.permission(2)}
+                disabled={!auth.permission(2) || !loaded}
               >
                 {auth.permission(2) ? (
                   "SUBMIT"

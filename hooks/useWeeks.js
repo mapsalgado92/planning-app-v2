@@ -18,7 +18,7 @@ const useWeeks = () => {
                   : 0
               )
             )
-          : alert(fetched)
+          : console.log(fetched)
       })
   }, [])
 
