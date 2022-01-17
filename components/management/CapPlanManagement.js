@@ -186,7 +186,7 @@ const CapPlanManagement = ({ data }) => {
                 form={form}
                 data={data && data.projects}
                 disabled={false}
-                reset={["lob"]}
+                reset={["lob", "capPlan"]}
                 callback={(f) => {
                   f.resetAll()
                 }}
@@ -202,6 +202,7 @@ const CapPlanManagement = ({ data }) => {
                     (lob) => lob.project === selection.get("project")._id
                   )
                 }
+                reset={[ "capPlan"]}
                 disabled={!selection.get("project")}
                 callback={(f) => {
                   f.resetAll()

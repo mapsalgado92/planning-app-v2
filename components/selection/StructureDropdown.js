@@ -13,7 +13,7 @@ const StructureDropdown = ({
 
   useEffect(() => {
     setSelected(selection.get(structureName))
-  }, [selection.get("capPlan")])
+  }, [selection.get(structureName)])
 
   return (
     <div className="select is-small is-rounded">
