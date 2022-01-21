@@ -1,9 +1,4 @@
-/**
-query: 
-*/
-
 import { connectToDatabase } from "../../../../lib/mongodb"
-import { ObjectId } from "mongodb"
 import { verifySession } from "../../../../lib/verification"
 
 export default async function handler(req, res) {
