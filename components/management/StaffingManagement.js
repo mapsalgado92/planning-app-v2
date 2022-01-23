@@ -258,7 +258,7 @@ const StaffingManagement = ({ data }) => {
               </button>
             </div>
 
-            {selection.get("capPlan") && selection.get("capPlan").staffing && (
+            {selection.get("capPlan") && selection.get("capPlan").staffing && selection.get("capPlan").staffing.distros && (
               <div className="column is-half is-size-7">
                 <label>DISTROS VIEW</label>
                 <table className="table has-text-centered">
@@ -272,7 +272,7 @@ const StaffingManagement = ({ data }) => {
                     </tr>
                   </thead>
                   <tbody>
-                    {selection.get("capPlan").staffing.distros &&
+                    {
                       selection.get("capPlan").staffing.distros.map((row) => {
                         return (
                           <tr key={"distro-row-" + row.interval + row.weekday}>
@@ -290,7 +290,7 @@ const StaffingManagement = ({ data }) => {
                 </table>
               </div>
             )}
-            {selection.get("capPlan") && selection.get("capPlan").staffing && (
+            {selection.get("capPlan") && selection.get("capPlan").staffing &&  selection.get("capPlan").staffing.shrinkage && (
               <div className="column is-half is-size-7">
                 <label>SHRINKAGE VIEW</label>
                 <table className="table has-text-centered">
@@ -301,7 +301,7 @@ const StaffingManagement = ({ data }) => {
                     </tr>
                   </thead>
                   <tbody>
-                    {selection.get("capPlan").staffing.shrinkage &&
+                    { 
                       selection.get("capPlan").staffing.shrinkage.map((row) => {
                         return (
                           <tr key={"shrinkage-row-" + row.code + row.mapped}>

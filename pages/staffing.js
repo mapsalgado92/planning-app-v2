@@ -141,10 +141,12 @@ export default function Staffing() {
                       null
                     )
                   }
+                  disabled={locked}
                 />
                 <button
                   className="button is-small is-rounded is-info"
                   onClick={() => selection.set("week", weeks.getCurrentWeek())}
+                  disabled={locked}
                 >
                   Next Week
                 </button>

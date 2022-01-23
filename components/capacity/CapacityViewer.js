@@ -1,13 +1,10 @@
-import { useState, useEffect } from "react"
-import ReactTooltip from "react-tooltip"
+
 import { FaExclamationCircle } from "react-icons/fa"
 
 const CapacityViewer = ({ capacity, fields, currentWeek, withStaff }) => {
-  const [isMounted, setIsMounted] = useState(false)
+  
 
-  useEffect(() => {
-    setIsMounted(true)
-  }, [])
+
   return (
     <div className="columns is-gapless is-size-7 is-mobile">
       <div className="column is-narrow table-container has-text-right">
@@ -59,26 +56,20 @@ const CapacityViewer = ({ capacity, fields, currentWeek, withStaff }) => {
                           ? "is-danger"
                           : "is-dark"
                       }
-                      style={{ whiteSpace: "nowrap" }}
+                      style={{ whiteSpace: "nowrap", cursor: "pointer" }}
+                      title={weekly.Comment}
+                      
+                      
                     >
-                      <div className="mx-auto">
-                        {isMounted && (
-                          <ReactTooltip
-                            id={"comment" + weekly.firstDate}
-                            effect={"solid"}
-                            html={true}
-                          />
-                        )}
+                      <div className="mx-auto" >
+                        
                         {weekly.firstDate}
                         <FaExclamationCircle
                           className={`ml-1 ${
                             weekly.Comment ? "has-text-warning" : "is-hidden"
                           }`}
-                          data-tip={
-                            weekly.Comment &&
-                            weekly.Comment.split("\n").join("<br/>")
-                          }
-                          data-for={"comment" + weekly.firstDate}
+                          
+                          
                         />
                       </div>
                     </th>

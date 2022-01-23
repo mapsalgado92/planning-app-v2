@@ -45,10 +45,10 @@ const CSVUploader = ({ loadedHandler, removeHandler, label }) => {
       >
         {({ file }) => (
           <div className="file has-name is-fullwidth is-right is-small has-text-centered is-info">
-            <label className="file-label">
-              <input className="file-input" type="file" name="csv" />
+            <label className="file-label" >
+              <input className="file-input" type="file" name="csv" onClick={handleOpenDialog} />
               <span className="file-cta">
-                <span className="file-label" onClick={handleOpenDialog}>
+                <span className="file-label" onClick={handleOpenDialog} >
                   File to Upload
                 </span>
               </span>
