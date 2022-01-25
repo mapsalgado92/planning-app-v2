@@ -202,7 +202,7 @@ const CapPlanManagement = ({ data }) => {
                     (lob) => lob.project === selection.get("project")._id
                   )
                 }
-                reset={[ "capPlan"]}
+                reset={["capPlan"]}
                 disabled={!selection.get("project")}
                 callback={(f) => {
                   f.resetAll()

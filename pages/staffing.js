@@ -28,6 +28,10 @@ const selectionFields = [
 export default function Staffing() {
   const [locked, setLocked] = useState(false)
 
+  const [view, setView] = useState({
+    type: null,
+  })
+
   const [shrinkage, setShrinkage] = useState([])
 
   const data = useData(["projects", "lobs", "capPlans"])
@@ -47,9 +51,15 @@ export default function Staffing() {
   const handleToggleLock = () => {
     if (locked) {
       capacity.reset()
+      setView({
+        type: null,
+      })
       setLocked(false)
-    } else {
+    } else if (selection.get("capPlan").staffing) {
+      erlang.updateInterval(selection.get("capPlan").staffing.interval || 900)
       capacity.generate(selection.get("capPlan"))
+      setLocked(true)
+    } else {
       setLocked(true)
     }
   }
@@ -73,6 +83,35 @@ export default function Staffing() {
       .catch((err) => console.log(err))
 
     data.refresh()
+  }
+
+  const handleGenerateRequirements = () => {
+    let extracted = capacity.get([selection.get("week")])[0]
+    let requirements = erlang.generateRequirements({
+      distros: selection.get("capPlan").staffing.distros,
+      vol: parseFloat(extracted.pVolumes),
+      aht: parseFloat(extracted.pAHT),
+      targets: {
+        sl: parseFloat(extracted.pSL),
+        occ: parseFloat(extracted.pOccupancy),
+        tt: parseFloat(extracted.pTT),
+        asa: 0,
+      },
+      abs: parseFloat(extracted.pAbs) / 100,
+      aux: parseFloat(extracted.pAux) / 100,
+      off: parseFloat(extracted.pOff) / 100,
+      absFromTotal: selection.get("capPlan").staffing.absFromTotal,
+    })
+
+    setView({
+      type: "req",
+      data: requirements,
+      weekly: extracted,
+      values: erlang.getWeeklyValues(
+        requirements,
+        selection.get("capPlan").staffing.fteHours
+      ),
+    })
   }
 
   return (
@@ -166,26 +205,7 @@ export default function Staffing() {
 
                 <button
                   className={`button is-light is-small is-rounded`}
-                  onClick={() => {
-                    let extracted = capacity.get([selection.get("week")])[0]
-                    let requirements = erlang.generateRequirements({
-                      distros: selection.get("capPlan").staffing.distros,
-                      vol: parseFloat(extracted.pVolumes),
-                      aht: parseFloat(extracted.pAHT),
-                      targets: {
-                        sl: parseFloat(extracted.pSL),
-                        occ: parseFloat(extracted.pOccupancy),
-                        tt: parseFloat(extracted.pTT),
-                        asa: 0,
-                      },
-                      abs: parseFloat(extracted.pAbs) / 100,
-                      aux: parseFloat(extracted.pAux) / 100,
-                      off: parseFloat(extracted.pOff) / 100,
-                      absFromTotal:
-                        selection.get("capPlan").staffing.absFromTotal,
-                    })
-                    console.log("Requirements", requirements)
-                  }}
+                  onClick={handleGenerateRequirements}
                   disabled={
                     !selection.checkRequired ||
                     !locked ||
@@ -222,12 +242,66 @@ export default function Staffing() {
             </div>
           </div>
         </div>
-        {capacity.isGenerated() && selection.get("week") && (
+        <br></br>
+        {view.type === "req" ? (
           <div>
-            {JSON.stringify(
-              capacity.get([selection.get("week")], ["totalFTE", "billableFTE"])
-            )}
+            <h2 className="has-text-centered">REQUIREMENTS</h2>
+            <div className="columns">
+              <div className="column is-narrow">
+                <label className="label has-text-danger">
+                  Requirement Values
+                </label>
+                <ul>
+                  <li>
+                    Total Requirement:{" "}
+                    <span className="has-text-link">
+                      {Math.round(view.values.totalReq * 10) / 10}
+                    </span>
+                  </li>
+                  <li>
+                    Peak Requirement:{" "}
+                    <span className="has-text-danger">
+                      {Math.round(view.values.peakReq.scheduled.agents * 10) /
+                        10}
+                    </span>{" "}
+                  </li>
+                  <li>
+                    Peak Time:{" "}
+                    <span className="has-text-primary">
+                      {view.values.peakReq.interval}, Weekday{" "}
+                      {view.values.peakReq.weekday}
+                    </span>
+                  </li>
+                </ul>
+                <br></br>
+                <label className="label">Volumes & Targets</label>
+                <ul>
+                  <li>Volumes: {Math.round(view.weekly.pVolumes)}</li>
+                  <li>AHT: {Math.round(view.weekly.pAHT)}</li>
+                  <li>SL Target: {view.weekly.pSL}</li>
+                </ul>
+                <br></br>
+                <label className="label">Shrinkage</label>
+                <ul>
+                  <li>AUX: {view.weekly.pAux} % of Logged</li>
+                  <li>
+                    ABS: {view.weekly.pAbs} % of{" "}
+                    {selection.get("capPlan") &&
+                    selection.get("capPlan").staffing &&
+                    selection.get("capPlan").staffing.absFromTotal
+                      ? "Total"
+                      : "Scheduled"}
+                  </li>
+                  <li>OFF: {view.weekly.pOff} % of Total</li>
+                </ul>
+              </div>
+              <div className="column "></div>
+            </div>
           </div>
+        ) : view.type === "req" ? (
+          <></>
+        ) : (
+          <></>
         )}
       </div>
     </>

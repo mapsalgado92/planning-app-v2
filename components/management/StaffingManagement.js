@@ -29,10 +29,17 @@ const formFields = [
   },
   {
     name: "fteHours",
-    default: 8,
+    default: 40,
     required: false,
     type: "number",
     label: "Number of hours for one FTE",
+  },
+  {
+    name: "interval",
+    default: 900,
+    required: false,
+    type: "number",
+    label: "Number of seconds on the base interval",
   },
 ]
 
@@ -128,6 +135,7 @@ const StaffingManagement = ({ data }) => {
                       auxDist: s.staffing.auxDist,
                       absFromTotal: s.staffing.absFromTotal,
                       fteHours: s.staffing.fteHours,
+                      interval: s.staffing.interval,
                     })
                   } else {
                     f.resetAll()
@@ -153,6 +161,20 @@ const StaffingManagement = ({ data }) => {
                   placeholder="FTE Hours"
                 ></input>
                 <label className="label is-size-6">FTE Hours</label>
+              </div>
+              <div className="field is-small is-grouped">
+                <input
+                  type="number"
+                  className="input is-small mx-1 is-rounded "
+                  style={{ maxWidth: "7em" }}
+                  value={form.get("interval") || ""}
+                  onChange={(e) => {
+                    form.set("interval", e.target.value)
+                  }}
+                  disabled={!selection.get("capPlan")}
+                  placeholder="Interval"
+                ></input>
+                <label className="label is-size-6">Interval</label>
               </div>
               <div className="control ">
                 <label className="label ">
@@ -258,22 +280,23 @@ const StaffingManagement = ({ data }) => {
               </button>
             </div>
 
-            {selection.get("capPlan") && selection.get("capPlan").staffing && selection.get("capPlan").staffing.distros && (
-              <div className="column is-half is-size-7">
-                <label>DISTROS VIEW</label>
-                <table className="table has-text-centered">
-                  <thead>
-                    <tr>
-                      <th>interval</th>
-                      <th>weekday</th>
-                      <th>vDist</th>
-                      <th>ahtDist</th>
-                      <th>auxDist</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {
-                      selection.get("capPlan").staffing.distros.map((row) => {
+            {selection.get("capPlan") &&
+              selection.get("capPlan").staffing &&
+              selection.get("capPlan").staffing.distros && (
+                <div className="column is-half is-size-7">
+                  <label>DISTROS VIEW</label>
+                  <table className="table has-text-centered">
+                    <thead>
+                      <tr>
+                        <th>interval</th>
+                        <th>weekday</th>
+                        <th>vDist</th>
+                        <th>ahtDist</th>
+                        <th>auxDist</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {selection.get("capPlan").staffing.distros.map((row) => {
                         return (
                           <tr key={"distro-row-" + row.interval + row.weekday}>
                             <td>{row.interval || "none"}</td>
@@ -286,34 +309,37 @@ const StaffingManagement = ({ data }) => {
                           </tr>
                         )
                       })}
-                  </tbody>
-                </table>
-              </div>
-            )}
-            {selection.get("capPlan") && selection.get("capPlan").staffing &&  selection.get("capPlan").staffing.shrinkage && (
-              <div className="column is-half is-size-7">
-                <label>SHRINKAGE VIEW</label>
-                <table className="table has-text-centered">
-                  <thead>
-                    <tr>
-                      <th>code</th>
-                      <th>mapped</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    { 
-                      selection.get("capPlan").staffing.shrinkage.map((row) => {
-                        return (
-                          <tr key={"shrinkage-row-" + row.code + row.mapped}>
-                            <td>{row.code || "none"}</td>
-                            <td>{row.mapped || "none"}</td>
-                          </tr>
-                        )
-                      })}
-                  </tbody>
-                </table>
-              </div>
-            )}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            {selection.get("capPlan") &&
+              selection.get("capPlan").staffing &&
+              selection.get("capPlan").staffing.shrinkage && (
+                <div className="column is-half is-size-7">
+                  <label>SHRINKAGE VIEW</label>
+                  <table className="table has-text-centered">
+                    <thead>
+                      <tr>
+                        <th>code</th>
+                        <th>mapped</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {selection
+                        .get("capPlan")
+                        .staffing.shrinkage.map((row) => {
+                          return (
+                            <tr key={"shrinkage-row-" + row.code + row.mapped}>
+                              <td>{row.code || "none"}</td>
+                              <td>{row.mapped || "none"}</td>
+                            </tr>
+                          )
+                        })}
+                    </tbody>
+                  </table>
+                </div>
+              )}
           </div>
         </div>
       ) : (

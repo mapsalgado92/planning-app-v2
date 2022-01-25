@@ -6,6 +6,8 @@ const useErlang = () => {
   const [out, setOut] = useState({
     requirements: [],
     results: [],
+    totalReq: null,
+    peakReq: null,
   })
 
   const updateInterval = (newInterval) => {
@@ -214,11 +216,36 @@ const useErlang = () => {
     return output
   }
 
+  const getWeeklyValues = (requirements, fteHours) => {
+    if (requirements.length === (3600 / interval) * 7 * 24) {
+      let accumulator = 0
+      let peak = null
+      requirements.forEach((slot) => {
+        if (slot.total && slot.total.agents) {
+          accumulator += slot.total.agents
+          if (peak === null && slot.total.agents) {
+            peak = slot
+          } else if (peak.total && peak.total.agents < slot.total.agents) {
+            peak = slot
+          }
+        }
+      })
+      return {
+        totalReq: (accumulator / fteHours) * (interval / 3600),
+        peakReq: peak,
+      }
+    } else {
+      console.log("Invalid Requirements")
+      return null
+    }
+  }
+
   return {
     updateInterval,
     calculateErlang,
     getRequired,
     generateRequirements,
+    getWeeklyValues,
     out,
   }
 }
