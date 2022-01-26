@@ -32,7 +32,6 @@ export default async function handler(req, res) {
         .find({ capPlan: id })
         .toArray()
 
-      console.log(entries.map((entry) => entry.week))
 
       let weeks = await db
         .collection("weeks")

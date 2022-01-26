@@ -92,24 +92,8 @@ const StaffingManagement = ({ data }) => {
               >
                 Upload Standard
               </button>
-              <button
-                className="button is-small  m-1 is-info is-rounded"
-                onClick={() => {
-                  handleSubmit("lob")
-                }}
-
-              >
-                Upload by Lob
-              </button>
-              <button
-                className="button is-small m-1 is-link is-rounded"
-                onClick={() => {
-                  handleSubmit("project")
-                }}
-              >
-                Upload by Project
-              </button>
-
+              
+          
               <br></br>
               <br></br>
 

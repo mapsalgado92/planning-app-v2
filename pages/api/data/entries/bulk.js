@@ -11,7 +11,7 @@ export default async function handler(req, res) {
   let verification = await verifySession(db, headers.authorization)
 
   if (method === "POST") {
-    if (verification.verified && verification.permission <= 1) {
+    if (verification.verified && verification.permission <= 2) {
       if(payloads && Array.isArray(payloads) && payloads[0] && payloads[0].capPlan && payloads[0].week){
         
         let response = await db.collection("capEntries").bulkWrite(payloads.map(payload => {
@@ -22,7 +22,7 @@ export default async function handler(req, res) {
                 capPlan: payload.capPlan,
                 week: payload.week
               },
-              update: {$set: payload},
+              update: {$set: {...payload, lastUpdated: new Date, updatedBy: verification.user.username, updateType: "single"}},
               upsert: true
             }
           }

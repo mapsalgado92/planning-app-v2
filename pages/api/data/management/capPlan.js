@@ -60,7 +60,7 @@ export default async function handler(req, res) {
           payload && payload && target
             ? await db
                 .collection("capPlans")
-                .updateOne({ _id: ObjectId(target) }, { $set: payload })
+                .updateOne({ _id: ObjectId(target) }, { $set: {...payload, lastUpdated: new Date, updatedBy: verification.user.username} })
             : { message: "Nothing to Update" }
         res
           .status(200)

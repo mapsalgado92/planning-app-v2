@@ -17,7 +17,7 @@ export default async function handler(req, res) {
       if (payload) {
         delete payload._id
 
-        const update = { $set: payload }
+        const update = { $set: {...payload, lastUpdated: new Date, updatedBy: verification.user.username, updateType: "single"} }
         const options = { upsert: true }
         let response = await db
           .collection("capEntries")

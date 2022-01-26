@@ -20,6 +20,7 @@ const CapacityViewer = ({ capacity, fields, currentWeek, withStaff }) => {
             </tr>
           </tfoot>
           <tbody>
+          
             {fields &&
               fields
                 .filter((field) => (withStaff ? 1 : field.order < 1000))
@@ -39,6 +40,11 @@ const CapacityViewer = ({ capacity, fields, currentWeek, withStaff }) => {
                     </th>
                   </tr>
                 ))}
+                <tr>
+                    <th className="has-text-link">
+                      {"Has Shrinkage? ->"}
+                    </th>
+                  </tr>
           </tbody>
         </table>
       </div>
@@ -102,7 +108,7 @@ const CapacityViewer = ({ capacity, fields, currentWeek, withStaff }) => {
                     {capacity &&
                       capacity.map((weekly) => (
                         <td
-                          key={"weekly-body-" + weekly.week.code}
+                          key={"weekly-body-" + weekly.week.code + field.internal}
                           style={{ whiteSpace: "nowrap", textAlign: "center" }}
                         >
                           {weekly[field.internal] ? (
@@ -116,6 +122,19 @@ const CapacityViewer = ({ capacity, fields, currentWeek, withStaff }) => {
                       ))}
                   </tr>
                 ))}
+                <tr>
+                    {capacity &&
+                      capacity.map((weekly) => (
+                        <td
+                          key={"weekly-body-" + weekly.week.code + "-has-shrinkage"}
+                          style={{ whiteSpace: "nowrap", textAlign: "center" }}
+                        >
+                          {weekly["hasShrinkage"] ? (
+                            <span className="has-text-primary" title={weekly.pShrinkage.map(row => row.mapping + " - " + row.code + " - " + row.percentage).join("\n")}>YES</span>
+                          ) : <span className="has-text-light">#</span>}
+                        </td>
+                      ))}
+                  </tr>
           </tbody>
         </table>
       </div>
