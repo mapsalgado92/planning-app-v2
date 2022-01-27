@@ -35,7 +35,7 @@ export const AuthProvider = ({ children }) => {
         setLogged(data.logged)
         console.log("DATA USER", data.user)
         setUser(data.user)
-
+        alert(data.message)
         data.user &&
           Cookies.set("user", JSON.stringify(data.user), {
             expires: Math.round(
@@ -63,9 +63,37 @@ export const AuthProvider = ({ children }) => {
       : null
   }
 
+  const resetPassword = (newPassword) => {
+    const request = {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: authorization(),
+      },
+      body: JSON.stringify({ password: newPassword }),
+    }
+
+    console.log(request)
+
+    fetch("/api/auth/password", request)
+      .then((response) => response.json())
+      .then((data) => {
+        alert(data.message)
+      })
+      .catch((err) => console.log("Something went wrong!"))
+  }
+
   return (
     <AuthContext.Provider
-      value={{ logged, user, login, logout, permission, authorization }}
+      value={{
+        logged,
+        user,
+        login,
+        logout,
+        permission,
+        authorization,
+        resetPassword,
+      }}
     >
       {children}
     </AuthContext.Provider>

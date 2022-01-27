@@ -5,6 +5,7 @@ import StructureDropdown from "../selection/StructureDropdown"
 
 import { FaLock } from "react-icons/fa"
 import CSVUploader from "../files/CSVUploader"
+import Heatmap from "../staffing/heatmap"
 
 const selectionFields = [
   { name: "project", default: null, required: true, type: "object", level: 1 },
@@ -283,61 +284,78 @@ const StaffingManagement = ({ data }) => {
             {selection.get("capPlan") &&
               selection.get("capPlan").staffing &&
               selection.get("capPlan").staffing.distros && (
-                <div className="column is-half is-size-7">
-                  <label>DISTROS VIEW</label>
-                  <table className="table has-text-centered">
-                    <thead>
-                      <tr>
-                        <th>interval</th>
-                        <th>weekday</th>
-                        <th>vDist</th>
-                        <th>ahtDist</th>
-                        <th>auxDist</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {selection.get("capPlan").staffing.distros.map((row) => {
-                        return (
-                          <tr key={"distro-row-" + row.interval + row.weekday}>
-                            <td>{row.interval || "none"}</td>
-                            <td>{row.weekday || "none"}</td>
-                            <td>
-                              {Math.round(row.vDist * 100000) / 1000 || "none"}
-                            </td>
-                            <td>{row.ahtDist || "none"}</td>
-                            <td>{row.auxDist || "none"}</td>
-                          </tr>
+                <div className="column is-half is-size-7 has-text-centered">
+                  <h2>VOLUMES</h2>
+                  <Heatmap
+                    xArray={[
+                      { label: "SUN", value: 1 },
+                      { label: "MON", value: 2 },
+                      { label: "TUE", value: 3 },
+                      { label: "WED", value: 4 },
+                      { label: "THU", value: 5 },
+                      { label: "FRI", value: 6 },
+                      { label: "SAT", value: 7 },
+                    ]}
+                    xField="weekday"
+                    yField="interval"
+                    yArray={[
+                      ...new Set(
+                        selection
+                          .get("capPlan")
+                          .staffing.distros.map((item) => item.interval)
+                      ),
+                    ]}
+                    data={selection
+                      .get("capPlan")
+                      .staffing.distros.map((item) => ({
+                        ...item,
+                        vDist: item.vDist * 100,
+                      }))}
+                    value={"vDist"}
+                    max={Math.max(
+                      ...selection
+                        .get("capPlan")
+                        .staffing.distros.map((item) =>
+                          item.vDist ? item.vDist * 100 : 0
                         )
-                      })}
-                    </tbody>
-                  </table>
+                    )}
+                  />
                 </div>
               )}
             {selection.get("capPlan") &&
               selection.get("capPlan").staffing &&
-              selection.get("capPlan").staffing.shrinkage && (
-                <div className="column is-half is-size-7">
-                  <label>SHRINKAGE VIEW</label>
-                  <table className="table has-text-centered">
-                    <thead>
-                      <tr>
-                        <th>code</th>
-                        <th>mapped</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {selection
+              selection.get("capPlan").staffing.distros && (
+                <div className="column is-half is-size-7 has-text-centered">
+                  <h2>AHT</h2>
+                  <Heatmap
+                    xArray={[
+                      { label: "SUN", value: 1 },
+                      { label: "MON", value: 2 },
+                      { label: "TUE", value: 3 },
+                      { label: "WED", value: 4 },
+                      { label: "THU", value: 5 },
+                      { label: "FRI", value: 6 },
+                      { label: "SAT", value: 7 },
+                    ]}
+                    xField="weekday"
+                    yField="interval"
+                    yArray={[
+                      ...new Set(
+                        selection
+                          .get("capPlan")
+                          .staffing.distros.map((item) => item.interval)
+                      ),
+                    ]}
+                    data={selection.get("capPlan").staffing.distros}
+                    value={"ahtDist"}
+                    max={Math.max(
+                      ...selection
                         .get("capPlan")
-                        .staffing.shrinkage.map((row) => {
-                          return (
-                            <tr key={"shrinkage-row-" + row.code + row.mapped}>
-                              <td>{row.code || "none"}</td>
-                              <td>{row.mapped || "none"}</td>
-                            </tr>
-                          )
-                        })}
-                    </tbody>
-                  </table>
+                        .staffing.distros.map((item) =>
+                          item.ahtDist ? item.ahtDist : 0
+                        )
+                    )}
+                  />
                 </div>
               )}
           </div>

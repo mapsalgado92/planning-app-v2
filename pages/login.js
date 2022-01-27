@@ -27,6 +27,12 @@ export default function Login() {
 
   const handleLogout = () => {
     auth.logout()
+    form.resetAll()
+  }
+
+  const handleResetPassword = () => {
+    auth.resetPassword(form.get("password"))
+    form.resetAll()
   }
 
   return (
@@ -89,6 +95,31 @@ export default function Login() {
                 <p>Permission: {auth.user.permission}</p>
 
                 <br></br>
+
+                <div className="field">
+                  <label className="label">
+                    <FaLock /> New Password
+                  </label>
+                  <div className="control">
+                    <input
+                      className="input"
+                      onChange={(e) => form.set("password", e.target.value)}
+                      value={form.get("password") || ""}
+                      type="password"
+                      placeholder="Password"
+                    />
+                  </div>
+                </div>
+
+                <br></br>
+
+                <button
+                  className="button mr-3 is-primary"
+                  onClick={handleResetPassword}
+                  type="button"
+                >
+                  RESET PASSWORD
+                </button>
 
                 <button
                   className="button is-danger"

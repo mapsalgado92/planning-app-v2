@@ -377,7 +377,7 @@ export default function Staffing() {
               </div>
             </div>
           </div>
-        ) : view.type === "req" ? (
+        ) : view.type === "res" ? (
           <></>
         ) : (
           <></>
