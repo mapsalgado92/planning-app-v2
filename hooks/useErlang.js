@@ -33,6 +33,7 @@ const useErlang = () => {
 	const calculateErlang = (vol, n, aht, targets, shrink) => {
 		const powOverFact = (pow, exp, fact) => {
 			if (fact === 1) {
+				console.log("RETURNED A", vol, n, aht)
 				return a
 			}
 			let prod = 1
@@ -63,6 +64,7 @@ const useErlang = () => {
 		}
 
 		if (n === 0 || vol === 0) {
+			console.log("THIS HAPPENED")
 			return null
 		}
 
@@ -157,16 +159,12 @@ const useErlang = () => {
     }
    */
 	const getRequired = (vol, aht, shrink, targets, email) => {
-		if (!vol && !email) {
-			return null
-		}
-
 		let firstEstimate = Math.round((vol * aht) / interval) + 1
 
 		let required = {}
 
 		if (vol) {
-			for (let n = firstEstimate; n < 1000; n++) {
+			for (let n = firstEstimate; n < 300; n++) {
 				required = calculateErlang(vol, n, aht, targets, shrink) || {}
 
 				if (required.acceptable) {

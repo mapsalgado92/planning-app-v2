@@ -61,6 +61,7 @@ export default function Staffing() {
 			capacity.generate(selection.get("capPlan"))
 			setLocked(true)
 		} else {
+			alert("Could not generate capacity!")
 			setLocked(true)
 		}
 	}
@@ -88,6 +89,24 @@ export default function Staffing() {
 
 	const handleGenerateRequirements = () => {
 		let extracted = capacity.get([selection.get("week")])[0]
+
+		let targets = {}
+
+		//Verification
+		if (!extracted.pVolumes && !extracted.pEmVolumes) {
+			alert("No Volumes!")
+			return -1
+		} else if (!selection.get("capPlan").staffing.distros) {
+			alert("No Distros!")
+			return -1
+		} else if (extracted.pSL >= 1) {
+			alert("SL target too high!")
+			return -1
+		} else if (extracted.pOccupancy >= 1) {
+			alert("Occupancy target too high!")
+			return -1
+		}
+
 		let requirements = erlang.generateRequirements({
 			distros: selection.get("capPlan").staffing.distros,
 			vol: parseFloat(extracted.pVolumes) || 0,
@@ -217,7 +236,8 @@ export default function Staffing() {
 										!locked ||
 										!selection.get("capPlan") ||
 										!selection.get("capPlan").staffing ||
-										!selection.get("capPlan").staffing.distros
+										!selection.get("capPlan").staffing.distros ||
+										!capacity.isGenerated()
 									}
 								>
 									Generate Requirements
@@ -279,31 +299,53 @@ export default function Staffing() {
 											{Math.round(view.values.blendTotalReq * 10) / 10 || "N/A"}
 										</span>
 									</li>
-									<li>
-										Peak Requirement:{" "}
-										<span className="has-text-danger">
-											{Math.round(
-												(view.values.peakReq.scheduled.blended ||
-													view.values.peakReq.scheduled.agents) * 10
-											) / 10}
-										</span>{" "}
-									</li>
-									<li>
-										Peak Time:{" "}
-										<span className="has-text-primary">
-											{view.values.peakReq.interval}, Weekday{" "}
-											{view.values.peakReq.weekday}
-										</span>
-									</li>
+
+									{view.values.peakReq && (
+										<>
+											<li>
+												Peak Requirement:{" "}
+												<span className="has-text-danger">
+													{Math.round(
+														(view.values.peakReq.scheduled.blended ||
+															view.values.peakReq.scheduled.agents) * 10
+													) / 10}
+												</span>{" "}
+											</li>
+											<li>
+												Peak Time:{" "}
+												<span className="has-text-primary">
+													{view.values.peakReq.interval}, Weekday{" "}
+													{view.values.peakReq.weekday}
+												</span>
+											</li>
+										</>
+									)}
+									<br></br>
+									<button
+										className="button is-danger is-light is-rounded is-small"
+										onClick={() => {
+											handleSubmit({
+												capPlan: selection.get("capPlan")._id,
+												week: selection.get("week").code,
+												required:
+													Math.round(view.values.blendTotalReq * 10) / 10,
+											})
+										}}
+										disabled={!view.values.blendTotalReq}
+									>
+										Set Entry
+									</button>
 								</ul>
 								<br></br>
 								<label className="label">Volumes & Targets</label>
 								<ul>
-									<li>Volumes: {Math.round(view.weekly.pVolumes)}</li>
-									<li>AHT: {Math.round(view.weekly.pAHT)}</li>
-									<li>Email Volumes: {Math.round(view.weekly.pEmVolumes)}</li>
-									<li>Email AHT: {Math.round(view.weekly.pEmAHT)}</li>
-									<li>SL Target: {view.weekly.pSL}</li>
+									<li>Volumes: {Math.round(view.weekly.pVolumes) || "N/A"}</li>
+									<li>AHT: {Math.round(view.weekly.pAHT) || "N/A"}</li>
+									<li>
+										Email Volumes: {Math.round(view.weekly.pEmVolumes) || "N/A"}
+									</li>
+									<li>Email AHT: {Math.round(view.weekly.pEmAHT) || "N/A"}</li>
+									<li>SL Target: {view.weekly.pSL || "N/A"}</li>
 								</ul>
 								<br></br>
 								<label className="label">Shrinkage</label>
@@ -381,7 +423,7 @@ export default function Staffing() {
 										Occupancy
 									</button>
 								</div>
-								<div style={{ maxHeight: "90vh", overflow: "scroll" }}>
+								<div style={{ maxHeight: "90vh", overflowY: "scroll" }}>
 									<Heatmap
 										xArray={[
 											{ label: "SUN", value: 1 },
