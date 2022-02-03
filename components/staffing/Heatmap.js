@@ -18,7 +18,7 @@ const Heatmap = ({ xArray, yArray, data, value }) => {
 		<table className="table is-striped is-fullwidth has-text-centered is-size-7">
 			<thead>
 				<tr>
-					<th>#</th>
+					<th style={{ width: "12.5%" }}>#</th>
 					{xArray && xArray.map((item) => <th>{item.label}</th>)}
 				</tr>
 			</thead>
