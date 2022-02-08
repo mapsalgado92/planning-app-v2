@@ -11,7 +11,7 @@ const selectionFields = [
   { name: "project", default: null, required: true, type: "object", level: 1 },
   { name: "lob", default: null, required: true, type: "object", level: 2 },
   { name: "capPlan", default: null, required: true, type: "object", level: 3 },
-  { name: "channel", default: null, required: true, type: "object", level: 4 },
+  { name: "channel", default: null, required: false, type: "array", level: 4 },
 ]
 
 const formFields = [
@@ -46,8 +46,8 @@ const formFields = [
 ]
 
 const StaffingManagement = ({ data }) => {
-  const [channels, setChannels] = useState([])
   const [distros, setDistros] = useState([])
+  const [channels, setChannels] = useState([])
 
   const auth = useAuth()
 
