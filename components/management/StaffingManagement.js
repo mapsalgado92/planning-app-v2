@@ -11,6 +11,7 @@ const selectionFields = [
   { name: "project", default: null, required: true, type: "object", level: 1 },
   { name: "lob", default: null, required: true, type: "object", level: 2 },
   { name: "capPlan", default: null, required: true, type: "object", level: 3 },
+  { name: "channel", default: null, required: true, type: "object", level: 4 },
 ]
 
 const formFields = [
@@ -45,8 +46,8 @@ const formFields = [
 ]
 
 const StaffingManagement = ({ data }) => {
+  const [channels, setChannels] = useState([])
   const [distros, setDistros] = useState([])
-  const [shrinkage, setShrinkage] = useState([])
 
   const auth = useAuth()
 
@@ -75,10 +76,9 @@ const StaffingManagement = ({ data }) => {
     )
       .then((response) => response.json())
       .then((data) => {
-        console.log(data.message)
+        alert(data.message)
       })
       .catch((err) => console.log(err))
-
     data.refresh()
     selection.resetOne("capPlan")
   }
@@ -96,7 +96,7 @@ const StaffingManagement = ({ data }) => {
                 form={form}
                 data={data && data.projects}
                 disabled={false}
-                reset={["lob", "capPlan"]}
+                reset={["lob", "capPlan", "channel"]}
                 callback={(f) => {
                   f.resetAll()
                 }}
@@ -113,7 +113,7 @@ const StaffingManagement = ({ data }) => {
                   )
                 }
                 disabled={!selection.get("project")}
-                reset={["capPlan"]}
+                reset={["capPlan", "channel"]}
                 callback={(f) => {
                   f.resetAll()
                 }}
@@ -129,6 +129,7 @@ const StaffingManagement = ({ data }) => {
                     (capPlan) => capPlan.lob === selection.get("lob")._id
                   )
                 }
+                reset={["channel"]}
                 disabled={!selection.get("lob")}
                 callback={(f, s) => {
                   if (s.staffing) {
@@ -227,12 +228,12 @@ const StaffingManagement = ({ data }) => {
               </div>
             </div>
             <div className="column is-half has-text-right">
-              <label className="label">Distributions</label>
+              <label className="label">Upload Channels</label>
               <CSVUploader
-                removeHandler={() => setDistros([])}
-                loadedHandler={(csv) => setDistros(csv)}
+                removeHandler={() => setChannels([])}
+                loadedHandler={(csv) => setChannels(csv)}
                 label={
-                  "interval (####) - weekday (DDD) - vDist (0.###) - ahtDist (#.# relative) - auxDist (0.###)"
+                  "channel - active (boolean) - sl (0-1) - occ (0-1) - tt (s) - conc (1+)"
                 }
               ></CSVUploader>
               <button
@@ -243,120 +244,157 @@ const StaffingManagement = ({ data }) => {
                       ...(selection.get("capPlan")
                         ? selection.get("capPlan").staffing
                         : {}),
-                      distros,
+                      channels,
                     },
                   })
                 }}
-                disabled={!selection.get("capPlan") || !distros}
+                disabled={!selection.get("capPlan") || !channels}
               >
-                Update Distros
+                Update Channels
               </button>
 
               <br></br>
-              <br></br>
-
-              <label className="label">Shrinkage</label>
-              <CSVUploader
-                removeHandler={() => setShrinkage([])}
-                loadedHandler={(csv) => setShrinkage(csv)}
-                label={
-                  "aux (AUX #, Vacation, Extra Day Off...) - mapped (OFF, ABS or AUX)"
-                }
-              ></CSVUploader>
-              <button
-                className="button is-small is-link is-rounded"
-                onClick={() => {
-                  handleSubmit({
-                    staffing: {
-                      ...(selection.get("capPlan")
-                        ? selection.get("capPlan").staffing
-                        : {}),
-                      shrinkage,
-                    },
-                  })
-                }}
-                disabled={!selection.get("capPlan") || !shrinkage}
-              >
-                Update Shrinkage
-              </button>
             </div>
+            <br></br>
+            <br></br>
+            {selection.get("capPlan") &&
+              selection.get("capPlan").staffing &&
+              selection.get("capPlan").staffing.channels && (
+                <>
+                  <div className="column is-half">
+                    <label className="label">Channel Configuration</label>
+                    <StructureDropdown
+                      structureName="channel"
+                      selection={selection}
+                      data={selection.get("capPlan").staffing.channels}
+                      disabled={false}
+                    />
+                    <br></br>
+                    <br></br>
+                    <ul>
+                      {selection.get("channel") &&
+                        Object.keys(selection.get("channel"))
+                          .filter((key) => key !== "distros")
+                          .map((key) => (
+                            <li className="is-size-7">
+                              {`${key.toLocaleUpperCase()}: ${
+                                selection.get("channel")[key] || "N/A"
+                              }`}
+                            </li>
+                          ))}
+                    </ul>
+                  </div>
+                  <div className="column is-half has-text-right">
+                    <label className="label">Upload Distros</label>
+                    <CSVUploader
+                      removeHandler={() => setDistros([])}
+                      loadedHandler={(csv) => setDistros(csv)}
+                      label={"weekday - interval - vDist - ahtDist"}
+                    ></CSVUploader>
+                    <button
+                      className="button is-small is-link is-rounded"
+                      onClick={() => {
+                        let newChannel = {
+                          ...selection.get("channel"),
+                          distros: distros,
+                        }
 
-            {selection.get("capPlan") &&
-              selection.get("capPlan").staffing &&
-              selection.get("capPlan").staffing.distros && (
-                <div className="column is-half is-size-7 has-text-centered">
-                  <h2>VOLUMES</h2>
-                  <Heatmap
-                    xArray={[
-                      { label: "SUN", value: 1 },
-                      { label: "MON", value: 2 },
-                      { label: "TUE", value: 3 },
-                      { label: "WED", value: 4 },
-                      { label: "THU", value: 5 },
-                      { label: "FRI", value: 6 },
-                      { label: "SAT", value: 7 },
-                    ]}
-                    xField="weekday"
-                    yField="interval"
-                    yArray={[
-                      ...new Set(
-                        selection
-                          .get("capPlan")
-                          .staffing.distros.map((item) => item.interval)
-                      ),
-                    ]}
-                    data={selection
-                      .get("capPlan")
-                      .staffing.distros.map((item) => ({
-                        ...item,
-                        vDist: item.vDist * 100,
-                      }))}
-                    value={"vDist"}
-                    max={Math.max(
-                      ...selection
-                        .get("capPlan")
-                        .staffing.distros.map((item) =>
-                          item.vDist ? item.vDist * 100 : 0
+                        let newStaffing = {
+                          ...selection.get("capPlan").staffing,
+                        }
+
+                        newStaffing.channels = newStaffing.channels.map(
+                          (channel) =>
+                            channel.name === newChannel.name
+                              ? newChannel
+                              : channel
                         )
+
+                        handleSubmit({
+                          staffing: newStaffing,
+                        })
+                      }}
+                      disabled={!selection.get("capPlan") || !channels}
+                    >
+                      Update Distros
+                    </button>
+
+                    <br></br>
+                  </div>
+
+                  {selection.get("channel") &&
+                    selection.get("channel").distros && (
+                      <div className="column is-half">
+                        <label className="label">Volumes</label>
+
+                        <Heatmap
+                          xArray={[
+                            { label: "SUN", value: 1 },
+                            { label: "MON", value: 2 },
+                            { label: "TUE", value: 3 },
+                            { label: "WED", value: 4 },
+                            { label: "THU", value: 5 },
+                            { label: "FRI", value: 6 },
+                            { label: "SAT", value: 7 },
+                          ]}
+                          xField="weekday"
+                          yField="interval"
+                          yArray={[
+                            ...new Set(
+                              selection
+                                .get("channel")
+                                .distros.map((item) => item.interval)
+                            ),
+                          ]}
+                          data={selection.get("channel").distros}
+                          value={"vDist"}
+                          max={Math.max(
+                            ...selection
+                              .get("channel")
+                              .distros.map((item) =>
+                                item.vDist ? item.vDist : 0
+                              )
+                          )}
+                        />
+                      </div>
                     )}
-                  />
-                </div>
-              )}
-            {selection.get("capPlan") &&
-              selection.get("capPlan").staffing &&
-              selection.get("capPlan").staffing.distros && (
-                <div className="column is-half is-size-7 has-text-centered">
-                  <h2>AHT</h2>
-                  <Heatmap
-                    xArray={[
-                      { label: "SUN", value: 1 },
-                      { label: "MON", value: 2 },
-                      { label: "TUE", value: 3 },
-                      { label: "WED", value: 4 },
-                      { label: "THU", value: 5 },
-                      { label: "FRI", value: 6 },
-                      { label: "SAT", value: 7 },
-                    ]}
-                    xField="weekday"
-                    yField="interval"
-                    yArray={[
-                      ...new Set(
-                        selection
-                          .get("capPlan")
-                          .staffing.distros.map((item) => item.interval)
-                      ),
-                    ]}
-                    data={selection.get("capPlan").staffing.distros}
-                    value={"ahtDist"}
-                    max={Math.max(
-                      ...selection
-                        .get("capPlan")
-                        .staffing.distros.map((item) =>
-                          item.ahtDist ? item.ahtDist : 0
-                        )
+                  {selection.get("channel") &&
+                    selection.get("channel").distros && (
+                      <div className="column is-half">
+                        <label className="label">AHT</label>
+
+                        <Heatmap
+                          xArray={[
+                            { label: "SUN", value: 1 },
+                            { label: "MON", value: 2 },
+                            { label: "TUE", value: 3 },
+                            { label: "WED", value: 4 },
+                            { label: "THU", value: 5 },
+                            { label: "FRI", value: 6 },
+                            { label: "SAT", value: 7 },
+                          ]}
+                          xField="weekday"
+                          yField="interval"
+                          yArray={[
+                            ...new Set(
+                              selection
+                                .get("channel")
+                                .distros.map((item) => item.interval)
+                            ),
+                          ]}
+                          data={selection.get("channel").distros}
+                          value={"ahtDist"}
+                          max={Math.max(
+                            ...selection
+                              .get("channel")
+                              .distros.map((item) =>
+                                item.ahtDist ? item.ahtDist : 0
+                              )
+                          )}
+                        />
+                      </div>
                     )}
-                  />
-                </div>
+                </>
               )}
           </div>
         </div>

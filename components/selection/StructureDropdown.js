@@ -44,7 +44,10 @@ const StructureDropdown = ({
         {!selected && <option value={null}>{`Select ${structureName}`}</option>}
         {data &&
           data.map((item, index) => (
-            <option key={"selection-" + item._id} value={JSON.stringify(item)}>
+            <option
+              key={"selection-" + (item._id || item.name)}
+              value={JSON.stringify(item)}
+            >
               {item.name}
             </option>
           ))}
