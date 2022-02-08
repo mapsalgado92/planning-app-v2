@@ -34,7 +34,7 @@ const targetFields = ["billable", "forecasted", "budget", "required"]
 	"pEmAHT",
 ]*/
 
-/*const actualFields = ["actAHT", "actVolumes", "actOff", "actAbs", "actAux"]*/
+const actualFields = ["actOff", "actAbs", "actAux"]
 
 const EntriyForm = ({ selection, week }) => {
   const [entry, setEntry] = useState(null)
@@ -279,6 +279,7 @@ const EntriyForm = ({ selection, week }) => {
               </div>
             ))}
           </div>
+					*/}
           <label>ACTUALS</label>
           <div className="columns is-multiline is-mobile pt-2">
             {actualFields.map((field) => (
@@ -316,7 +317,7 @@ const EntriyForm = ({ selection, week }) => {
               </div>
             ))}
           </div>
-		  */}
+
           <label>COMMENT</label>
           <div className="columns mb-0">
             <div key={`Col-Comment`} className="column is-12 pb-0">

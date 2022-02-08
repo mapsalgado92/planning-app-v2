@@ -1,10 +1,6 @@
-
 import { FaExclamationCircle } from "react-icons/fa"
 
 const CapacityViewer = ({ capacity, fields, currentWeek, withStaff }) => {
-  
-
-
   return (
     <div className="columns is-gapless is-size-7 is-mobile">
       <div className="column is-narrow table-container has-text-right">
@@ -20,7 +16,6 @@ const CapacityViewer = ({ capacity, fields, currentWeek, withStaff }) => {
             </tr>
           </tfoot>
           <tbody>
-          
             {fields &&
               fields
                 .filter((field) => (withStaff ? 1 : field.order < 1000))
@@ -40,11 +35,15 @@ const CapacityViewer = ({ capacity, fields, currentWeek, withStaff }) => {
                     </th>
                   </tr>
                 ))}
-                <tr>
-                    <th className="has-text-link">
-                      {"Has Shrinkage? ->"}
-                    </th>
-                  </tr>
+            <tr>
+              <th className="has-text-link">{"Has Shrinkage? ->"}</th>
+            </tr>
+            <tr>
+              <th className="has-text-link">{"Has Planned? ->"}</th>
+            </tr>
+            <tr>
+              <th className="has-text-link">{"Has Actual? ->"}</th>
+            </tr>
           </tbody>
         </table>
       </div>
@@ -64,18 +63,13 @@ const CapacityViewer = ({ capacity, fields, currentWeek, withStaff }) => {
                       }
                       style={{ whiteSpace: "nowrap", cursor: "pointer" }}
                       title={weekly.Comment}
-                      
-                      
                     >
-                      <div className="mx-auto" >
-                        
+                      <div className="mx-auto">
                         {weekly.firstDate}
                         <FaExclamationCircle
                           className={`ml-1 ${
                             weekly.Comment ? "has-text-warning" : "is-hidden"
                           }`}
-                          
-                          
                         />
                       </div>
                     </th>
@@ -108,7 +102,9 @@ const CapacityViewer = ({ capacity, fields, currentWeek, withStaff }) => {
                     {capacity &&
                       capacity.map((weekly) => (
                         <td
-                          key={"weekly-body-" + weekly.week.code + field.internal}
+                          key={
+                            "weekly-body-" + weekly.week.code + field.internal
+                          }
                           style={{ whiteSpace: "nowrap", textAlign: "center" }}
                         >
                           {weekly[field.internal] ? (
@@ -122,19 +118,96 @@ const CapacityViewer = ({ capacity, fields, currentWeek, withStaff }) => {
                       ))}
                   </tr>
                 ))}
-                <tr>
-                    {capacity &&
-                      capacity.map((weekly) => (
-                        <td
-                          key={"weekly-body-" + weekly.week.code + "-has-shrinkage"}
-                          style={{ whiteSpace: "nowrap", textAlign: "center" }}
-                        >
-                          {weekly["hasShrinkage"] ? (
-                            <span className="has-text-primary" title={weekly.pShrinkage.map(row => row.mapping + " - " + row.code + " - " + row.percentage).join("\n")}>YES</span>
-                          ) : <span className="has-text-light">#</span>}
-                        </td>
-                      ))}
-                  </tr>
+            <tr>
+              {capacity &&
+                capacity.map((weekly) => (
+                  <td
+                    key={"weekly-body-" + weekly.week.code + "-has-shrinkage"}
+                    style={{ whiteSpace: "nowrap", textAlign: "center" }}
+                  >
+                    {weekly["hasShrinkage"] ? (
+                      <span
+                        className="has-text-primary"
+                        title={[
+                          "mapping - code - percentage",
+                          ...weekly.pShrinkage.map(
+                            (row) =>
+                              row.mapping +
+                              " - " +
+                              row.code +
+                              " - " +
+                              row.percentage
+                          ),
+                        ].join("\n")}
+                      >
+                        YES
+                      </span>
+                    ) : (
+                      <span className="has-text-light">#</span>
+                    )}
+                  </td>
+                ))}
+            </tr>
+            <tr>
+              {capacity &&
+                capacity.map((weekly) => (
+                  <td
+                    key={"weekly-body-" + weekly.week.code + "-has-planned"}
+                    style={{ whiteSpace: "nowrap", textAlign: "center" }}
+                  >
+                    {weekly["hasPlanned"] ? (
+                      <span
+                        className="has-text-primary"
+                        title={[
+                          "channel - volumes - aht",
+                          ...weekly.planned.map(
+                            (row) =>
+                              row.channel +
+                              " - " +
+                              row.volumes +
+                              " - " +
+                              row.aht
+                          ),
+                        ].join("\n")}
+                      >
+                        YES
+                      </span>
+                    ) : (
+                      <span className="has-text-light">#</span>
+                    )}
+                  </td>
+                ))}
+            </tr>
+            <tr>
+              {capacity &&
+                capacity.map((weekly) => (
+                  <td
+                    key={"weekly-body-" + weekly.week.code + "-has-actual"}
+                    style={{ whiteSpace: "nowrap", textAlign: "center" }}
+                  >
+                    {weekly["hasActual"] ? (
+                      <span
+                        className="has-text-primary"
+                        title={[
+                          "channel - volumes - aht",
+                          ...weekly.actual.map(
+                            (row) =>
+                              row.channel +
+                              " - " +
+                              row.volumes +
+                              " - " +
+                              row.aht
+                          ),
+                        ].join("\n")}
+                      >
+                        YES
+                      </span>
+                    ) : (
+                      <span className="has-text-light">#</span>
+                    )}
+                  </td>
+                ))}
+            </tr>
           </tbody>
         </table>
       </div>
