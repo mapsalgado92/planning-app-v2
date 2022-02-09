@@ -51,8 +51,8 @@ const Heatmap = ({ xArray, yArray, data, value }) => {
 											{Math.round(
 												parseFloat(
 													data[yIndex + yArray.length * xIndex][value]
-												) * 100
-											) / 100 || ""}
+												) * 1000
+											) / 1000 || ""}
 										</td>
 									)
 								})}
