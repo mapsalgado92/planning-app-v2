@@ -3,12 +3,6 @@ import { useState } from "react"
 const useErlang = () => {
   const [interval, setInterval] = useState(900)
 
-  const [out, setOut] = useState({
-    channels: [],
-    totalReq: null,
-    peakReq: null,
-  })
-
   const updateInterval = (newInterval) => {
     setInterval(newInterval)
   }
@@ -181,10 +175,14 @@ const useErlang = () => {
 
   const getBORequired = (vol, aht, shrink) => {
     if (vol) {
-      return shrink ? (vol * aht) / (1 - shrink) : vol * aht
+      let agents = shrink
+        ? ((vol * aht) / interval) * (1 - shrink)
+        : (vol * aht) / interval
+
+      return { agents: agents, volumes: vol, aht: aht }
     } else {
       console.log("No Volumes")
-      return 0
+      return {}
     }
   }
 
@@ -193,10 +191,12 @@ const useErlang = () => {
   const generateLiveRequirements = ({
     distros,
     vol,
+    aht,
     targets,
     abs,
     off,
     aux,
+    absFromTotal,
   }) => {
     let output = distros.map((entry) => {
       let usedAux = entry.auxDist ? entry.auxDist : aux
@@ -211,13 +211,13 @@ const useErlang = () => {
         ...entry,
         scheduled: getLiveRequired(
           entry.vDist * vol,
-          entry.ahtDist * targets.aht,
+          entry.ahtDist * aht,
           scheduledShrink,
           targets
         ),
         total: getLiveRequired(
           entry.vDist * vol,
-          entry.ahtDist * targets.aht,
+          entry.ahtDist * aht,
           totalShrink,
           targets
         ),
@@ -227,7 +227,15 @@ const useErlang = () => {
     return output
   }
 
-  const generateBORequirements = ({ distros, vol, targets, abs, off, aux }) => {
+  const generateBORequirements = ({
+    distros,
+    vol,
+    aht,
+    abs,
+    off,
+    aux,
+    absFromTotal,
+  }) => {
     let output = distros.map((entry) => {
       let usedAux = entry.auxDist ? entry.auxDist : aux
       let usedAbs = absFromTotal ? abs : 1 - abs * (1 - off)
@@ -240,11 +248,15 @@ const useErlang = () => {
       return {
         ...entry,
         scheduled: getBORequired(
-          entry.mask * vol,
-          targets.aht,
+          entry.vDist * vol,
+          aht * entry.ahtDist,
           scheduledShrink
         ),
-        total: getBORequired(entry.mask * vol, targets.aht, totalShrink),
+        total: getBORequired(
+          entry.vDist * vol,
+          aht * entry.ahtDist,
+          totalShrink
+        ),
       }
     })
 
@@ -254,20 +266,23 @@ const useErlang = () => {
   const blendRequirements = (requirementsArr) => {
     if (requirementsArr[0] && requirementsArr[0].length) {
       let blended = requirementsArr[0].map((item) => {
-        if (item.scheduled && item.total) {
-          return {
-            scheduled: item.scheduled.agents,
-            total: item.total.agents,
-          }
-        } else {
-          console.log("Invalid Requirements!")
-          return { scheduled: 0, total: 0 }
+        return {
+          interval: item.interval,
+          weekday: item.weekday,
+          scheduled: { agents: item.scheduled.agents || 0 },
+          total: { agents: item.total.agents || 0 },
         }
       })
 
       if (requirementsArr.length > 1) {
-        for (let i = 1; i < requirementsArr.length; i++) {}
+        for (let i = 1; i < requirementsArr.length; i++) {
+          requirementsArr[i].forEach((item, index) => {
+            blended[index].scheduled.agents += item.scheduled.agents || 0
+            blended[index].total.agents += item.total.agents || 0
+          })
+        }
       }
+      return blended
     } else {
       console.log("Invalid Requirements Array")
       return -1
@@ -277,12 +292,10 @@ const useErlang = () => {
   const getWeeklyValues = (requirements, fteHours) => {
     if (requirements.length === (3600 / interval) * 7 * 24) {
       let totalAccumulator = 0
-      let emailAccumulator = 0
       let peak = null
       requirements.forEach((slot) => {
         if (slot.total && slot.total.agents) {
           totalAccumulator += slot.total.agents || 0
-          emailAccumulator += slot.total.emAgents || 0
 
           if (peak === null && slot.total.agents) {
             peak = slot
@@ -291,13 +304,9 @@ const useErlang = () => {
           }
         }
       })
-      console.log("EMAIL ACCUMULATOR: ", emailAccumulator)
+
       return {
-        voiceTotalReq: (totalAccumulator / fteHours) * (interval / 3600),
-        emailTotalReq: (emailAccumulator / fteHours) * (interval / 3600),
-        blendTotalReq:
-          (totalAccumulator / fteHours) * (interval / 3600) +
-          (emailAccumulator / fteHours) * (interval / 3600),
+        totalReq: (totalAccumulator / fteHours) * (interval / 3600),
         peakReq: peak,
       }
     } else {
@@ -310,8 +319,8 @@ const useErlang = () => {
     updateInterval,
     generateLiveRequirements,
     generateBORequirements,
+    blendRequirements,
     getWeeklyValues,
-    out,
   }
 }
 
