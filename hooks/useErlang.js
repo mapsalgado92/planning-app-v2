@@ -263,9 +263,9 @@ const useErlang = () => {
     return output
   }
 
-  const blendRequirements = (requirementsArr) => {
+  const boltOnRequirements = (requirementsArr) => {
     if (requirementsArr[0] && requirementsArr[0].length) {
-      let blended = requirementsArr[0].map((item) => {
+      let boltOn = requirementsArr[0].map((item) => {
         return {
           interval: item.interval,
           weekday: item.weekday,
@@ -277,12 +277,12 @@ const useErlang = () => {
       if (requirementsArr.length > 1) {
         for (let i = 1; i < requirementsArr.length; i++) {
           requirementsArr[i].forEach((item, index) => {
-            blended[index].scheduled.agents += item.scheduled.agents || 0
-            blended[index].total.agents += item.total.agents || 0
+            boltOn[index].scheduled.agents += item.scheduled.agents || 0
+            boltOn[index].total.agents += item.total.agents || 0
           })
         }
       }
-      return blended
+      return boltOn
     } else {
       console.log("Invalid Requirements Array")
       return -1
@@ -319,7 +319,7 @@ const useErlang = () => {
     updateInterval,
     generateLiveRequirements,
     generateBORequirements,
-    blendRequirements,
+    boltOnRequirements,
     getWeeklyValues,
   }
 }
