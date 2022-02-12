@@ -221,6 +221,12 @@ const useErlang = () => {
 					totalShrink,
 					targets
 				),
+				net: getLiveRequired(
+					entry.vDist * vol,
+					entry.ahtDist * aht,
+					0,
+					targets
+				),
 			}
 		})
 
