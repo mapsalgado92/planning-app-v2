@@ -25,7 +25,7 @@ const Heatmap = ({ xArray, yArray, data, value }) => {
       <tbody>
         {yArray &&
           yArray.map((yItem, yIndex) => (
-            <tr>
+            <tr key={yItem + "-" + yIndex}>
               <th
                 style={{
                   borderColor: "rgba(0,0,0,0)",
@@ -47,6 +47,7 @@ const Heatmap = ({ xArray, yArray, data, value }) => {
                         })`,
                         borderColor: "rgba(0,0,0,0)",
                       }}
+                      key={xItem + "-" + xIndex}
                     >
                       {Math.round(
                         parseFloat(
