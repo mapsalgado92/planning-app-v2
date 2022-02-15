@@ -43,11 +43,19 @@ const formFields = [
     type: "number",
     label: "Number of seconds on the base interval",
   },
+  {
+    name: "blendOcc",
+    default: 1,
+    required: false,
+    type: "number",
+    label: "Blended Occupancy",
+  },
 ]
 
 const StaffingManagement = ({ data }) => {
   const [distros, setDistros] = useState([])
   const [channels, setChannels] = useState([])
+  const [copyTo, setCopyTo] = useState([])
 
   const auth = useAuth()
 
@@ -81,6 +89,27 @@ const StaffingManagement = ({ data }) => {
       .catch((err) => console.log(err))
     data.refresh()
     selection.resetOne("capPlan")
+  }
+
+  const handleCopyStaffing = async () => {
+    let staffingToCopy = selection.get("capPlan").staffing
+
+    copyTo.forEach((entry) => {
+      console.log(entry.capPlan, staffingToCopy)
+      fetch(`/api/data/management/capPlan?id=${entry.capPlan}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: auth.authorization(),
+        },
+        body: JSON.stringify({ payload: { staffing: staffingToCopy } }),
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          alert(data.message)
+        })
+        .catch((err) => console.log(err))
+    })
   }
 
   return (
@@ -138,6 +167,7 @@ const StaffingManagement = ({ data }) => {
                       absFromTotal: s.staffing.absFromTotal,
                       fteHours: s.staffing.fteHours,
                       interval: s.staffing.interval,
+                      blendOcc: s.staffing.blendOcc,
                     })
                   } else {
                     f.resetAll()
@@ -155,56 +185,68 @@ const StaffingManagement = ({ data }) => {
                   type="number"
                   className="input is-small mx-1 is-rounded "
                   style={{ maxWidth: "7em" }}
-                  value={form.get("fteHours") || ""}
+                  value={form.get("fteHours") || 40}
                   onChange={(e) => {
                     form.set("fteHours", e.target.value)
                   }}
                   disabled={!selection.get("capPlan")}
                   placeholder="FTE Hours"
                 ></input>
-                <label className="label is-size-6">FTE Hours</label>
+                <label>FTE Hours</label>
               </div>
+
               <div className="field is-small is-grouped">
                 <input
                   type="number"
                   className="input is-small mx-1 is-rounded "
                   style={{ maxWidth: "7em" }}
-                  value={form.get("interval") || ""}
+                  value={form.get("interval") || 900}
                   onChange={(e) => {
                     form.set("interval", e.target.value)
                   }}
                   disabled={!selection.get("capPlan")}
                   placeholder="Interval"
                 ></input>
-                <label className="label is-size-6">Interval</label>
+                <label>Interval</label>
+              </div>
+
+              <div className="field is-small is-grouped">
+                <input
+                  type="number"
+                  className="input is-small mx-1 is-rounded "
+                  style={{ maxWidth: "7em" }}
+                  value={form.get("blendOcc") * 100 || 100}
+                  onChange={(e) => {
+                    form.set("blendOcc", e.target.value / 100)
+                  }}
+                  disabled={!selection.get("capPlan")}
+                  placeholder="Blended Occupancy Target"
+                ></input>
+                <label>Blended Occupancy Target (%)</label>
               </div>
               <div className="control ">
-                <label className="label ">
-                  <input
-                    type="checkbox"
-                    className="mx-2 "
-                    checked={form.get("auxDist") || false}
-                    onChange={() => {
-                      form.set("auxDist", !form.get("auxDist"))
-                    }}
-                    disabled={!selection.get("capPlan")}
-                  ></input>
-                  Uses Aux Dist?
-                </label>
+                <input
+                  type="checkbox"
+                  className="my-auto mx-3"
+                  checked={form.get("auxDist") || false}
+                  onChange={() => {
+                    form.set("auxDist", !form.get("auxDist"))
+                  }}
+                  disabled={!selection.get("capPlan")}
+                ></input>
+                <label>Uses Aux Dist?</label>
               </div>
               <div className="control">
-                <label className="label">
-                  <input
-                    type="checkbox"
-                    className="mx-2"
-                    checked={form.get("absFromTotal") || false}
-                    onChange={() => {
-                      form.set("absFromTotal", !form.get("absFromTotal"))
-                    }}
-                    disabled={!selection.get("capPlan")}
-                  ></input>
-                  ABS relative to Total?
-                </label>
+                <input
+                  type="checkbox"
+                  className="my-auto mx-3"
+                  checked={form.get("absFromTotal") || false}
+                  onChange={() => {
+                    form.set("absFromTotal", !form.get("absFromTotal"))
+                  }}
+                  disabled={!selection.get("capPlan")}
+                ></input>
+                <label>ABS relative to Total?</label>
               </div>
               <br></br>
 
@@ -227,7 +269,29 @@ const StaffingManagement = ({ data }) => {
                 </button>
               </div>
             </div>
+
             <div className="column is-half has-text-right">
+              <label className="label">Copy Staffing</label>
+              <CSVUploader
+                removeHandler={() => setCopyTo([])}
+                loadedHandler={(csv) => setCopyTo(csv)}
+                label={"capPlan"}
+              ></CSVUploader>
+              <button
+                className="button is-small is-link is-rounded"
+                onClick={() => {
+                  handleCopyStaffing()
+                }}
+                disabled={
+                  !selection.get("capPlan") ||
+                  !copyTo ||
+                  !selection.get("capPlan").staffing
+                }
+              >
+                Copy Staffing
+              </button>
+              <br></br>
+              <br></br>
               <label className="label">Upload Channels</label>
               <CSVUploader
                 removeHandler={() => setChannels([])}
@@ -248,7 +312,7 @@ const StaffingManagement = ({ data }) => {
                     },
                   })
                 }}
-                disabled={!selection.get("capPlan") || !channels}
+                disabled={!selection.get("capPlan")}
               >
                 Update Channels
               </button>
@@ -276,7 +340,7 @@ const StaffingManagement = ({ data }) => {
                         Object.keys(selection.get("channel"))
                           .filter((key) => key !== "distros")
                           .map((key) => (
-                            <li className="is-size-7">
+                            <li>
                               {`${key.toLocaleUpperCase()}: ${
                                 selection.get("channel")[key] || "N/A"
                               }`}
@@ -324,7 +388,7 @@ const StaffingManagement = ({ data }) => {
 
                   {selection.get("channel") &&
                     selection.get("channel").distros && (
-                      <div className="column is-half">
+                      <div className="column is-one-third">
                         <label className="label">Volumes</label>
 
                         <Heatmap
@@ -360,7 +424,7 @@ const StaffingManagement = ({ data }) => {
                     )}
                   {selection.get("channel") &&
                     selection.get("channel").distros && (
-                      <div className="column is-half">
+                      <div className="column is-one-third">
                         <label className="label">AHT</label>
 
                         <Heatmap
@@ -389,6 +453,42 @@ const StaffingManagement = ({ data }) => {
                               .get("channel")
                               .distros.map((item) =>
                                 item.ahtDist ? item.ahtDist : 0
+                              )
+                          )}
+                        />
+                      </div>
+                    )}
+                  {selection.get("channel") &&
+                    selection.get("channel").distros && (
+                      <div className="column is-one-third">
+                        <label className="label">Min Agents</label>
+
+                        <Heatmap
+                          xArray={[
+                            { label: "SUN", value: 1 },
+                            { label: "MON", value: 2 },
+                            { label: "TUE", value: 3 },
+                            { label: "WED", value: 4 },
+                            { label: "THU", value: 5 },
+                            { label: "FRI", value: 6 },
+                            { label: "SAT", value: 7 },
+                          ]}
+                          xField="weekday"
+                          yField="interval"
+                          yArray={[
+                            ...new Set(
+                              selection
+                                .get("channel")
+                                .distros.map((item) => item.interval)
+                            ),
+                          ]}
+                          data={selection.get("channel").distros}
+                          value={"minAgents"}
+                          max={Math.max(
+                            ...selection
+                              .get("channel")
+                              .distros.map((item) =>
+                                item.minAgents ? item.minAgents : 0
                               )
                           )}
                         />

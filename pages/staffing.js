@@ -99,11 +99,16 @@ export default function Staffing() {
     }
 
     let requirementsArr = channels.map((channel) => {
-      if (!channel.distros) {
-        alert("Missing Distros in Channel!")
-        return []
-      } else if (channel.live === "TRUE") {
-        return erlang.generateLiveRequirements({
+      if (channel.live === "TRUE") {
+        if (!channel.distros) {
+          alert("Missing Distros in Channel!")
+          return {
+            ...channel,
+            data: [],
+            values: {},
+          }
+        }
+        let liveRequirements = erlang.generateLiveRequirements({
           distros: channel.distros,
           vol: extracted[`${channel.name}.pVolumes`],
           aht: extracted[`${channel.name}.pAHT`],
@@ -118,37 +123,94 @@ export default function Staffing() {
           off: parseFloat(extracted.pOff) / 100 || 0,
           absFromTotal: capPlan.staffing.absFromTotal,
         })
+        return {
+          ...channel,
+          data: liveRequirements,
+          values: erlang.getWeeklyValues(
+            liveRequirements,
+            capPlan.staffing.fteHours,
+            capPlan.staffing.blendOcc
+          ),
+        }
       } else if (channel.live === "FALSE") {
-        return erlang.generateBORequirements({
-          distros: channel.distros,
+        let boRequirements = erlang.generateBORequirements({
           vol: extracted[`${channel.name}.pVolumes`],
           aht: extracted[`${channel.name}.pAHT`],
           abs: parseFloat(extracted.pAbs) / 100 || 0,
           aux: parseFloat(extracted.pAux) / 100 || 0,
           off: parseFloat(extracted.pOff) / 100 || 0,
           absFromTotal: capPlan.staffing.absFromTotal,
+          occ: capPlan.staffing.blendOcc || 0,
         })
+
+        return {
+          ...channel,
+          data: boRequirements,
+          values: erlang.getWeeklyValues(
+            boRequirements,
+            capPlan.staffing.fteHours,
+            capPlan.staffing.blendOcc
+          ),
+        }
       } else {
         alert("Invalid Channel Type")
       }
     })
 
-    let blended = erlang.blendRequirements(requirementsArr)
+    let liveBoltOnData = erlang.boltOnRequirements(
+      requirementsArr
+        .filter((item) => item.live === "TRUE")
+        .map((item) => item.data)
+    )
+
+    let liveTotalRealSurplus =
+      requirementsArr
+        .filter((item) => item.live === "TRUE")
+        .reduce(
+          (partialSum, item) => partialSum + item.values.totalRealSurplus || 0,
+          0
+        ) || 0
+
+    let offlineTotalReq =
+      requirementsArr
+        .filter((item) => item.live === "FALSE")
+        .reduce(
+          (partialSum, item) => partialSum + item.values.totalReq || 0,
+          0
+        ) || 0
+
+    let boltOnRequirements = {
+      name: "Bolt On",
+      live: "TRUE",
+      data: liveBoltOnData,
+      values: erlang.getWeeklyValues(liveBoltOnData, capPlan.staffing.fteHours),
+    }
+
+    boltOnRequirements.values.totalReq += offlineTotalReq
+    boltOnRequirements.values.totalRealSurplus = liveTotalRealSurplus
+
+    let blendedRequirmenets = {
+      name: "Blended",
+      live: "TRUE",
+      data: liveBoltOnData,
+      values: erlang.getWeeklyValues(liveBoltOnData, capPlan.staffing.fteHours),
+    }
+
+    if (offlineTotalReq > liveTotalRealSurplus) {
+      blendedRequirmenets.values.totalReq +=
+        offlineTotalReq - liveTotalRealSurplus
+      blendedRequirmenets.values.totalRealSurplus === 0
+    } else {
+      blendedRequirmenets.values.totalRealSurplus =
+        liveTotalRealSurplus - offlineTotalReq
+    }
+
+    blendedRequirmenets.values.totalSurplus = "N/A"
 
     let requirements = [
-      {
-        name: "Blended",
-        data: blended,
-        values: erlang.getWeeklyValues(blended, capPlan.staffing.fteHours),
-      },
-      ...channels.map((channel, index) => ({
-        name: channel.name,
-        data: requirementsArr[index],
-        values: erlang.getWeeklyValues(
-          requirementsArr[index],
-          capPlan.staffing.fteHours
-        ),
-      })),
+      ...requirementsArr,
+      boltOnRequirements,
+      blendedRequirmenets,
     ]
 
     setView({
@@ -290,7 +352,6 @@ export default function Staffing() {
 
             <br></br>
 
-            {/*///////////////////////////////////////////////////////// NEW CODE START /////////////////////////// COMPLETED ////////////////////////////*/}
             <div className="has-text-right">
               <label className="label">Planned Vol & AHT</label>
               <CSVUploader
@@ -325,166 +386,283 @@ export default function Staffing() {
                 Update Actual Vol & AHT
               </button>
             </div>
-
-            {/*///////////////////////////////////////////////////////// NEW CODE END ///////////////////////////////////////////////////////////*/}
           </div>
         </div>
         <br></br>
 
         {view.type === "req" && view.requirements ? (
           <>
-            {view.requirements.map((channel) => (
-              <div>
-                <div className="columns">
-                  <div className="column is-narrow">
-                    <br></br>
-
-                    <br></br>
-                    <label className="label has-text-danger">
-                      {channel.name + " Requirements"}
-                    </label>
-                    <ul>
-                      <li>
-                        Total Requirement:{" "}
-                        <span className="has-text-link">
-                          {Math.round(channel.values.totalReq * 10) / 10}
-                        </span>
-                      </li>
-
-                      {channel.values.peakReq && (
-                        <>
-                          <li>
-                            Peak Requirement:{" "}
-                            <span className="has-text-danger">
-                              {Math.round(
-                                (channel.values.peakReq.scheduled.agents ||
-                                  channel.values.peakReq.scheduled.agents) * 10
-                              ) / 10}
-                            </span>{" "}
-                          </li>
-                          <li>
-                            Peak Time:{" "}
-                            <span className="has-text-primary">
-                              {channel.values.peakReq.interval}, Weekday{" "}
-                              {channel.values.peakReq.weekday}
-                            </span>
-                          </li>
-                        </>
-                      )}
+            {view.requirements.map((channel) =>
+              channel.live === "TRUE" ? (
+                <div>
+                  <div className="columns">
+                    <div className="column is-narrow">
                       <br></br>
-                    </ul>
-                    <br></br>
-                    <label className="label">Volumes & Targets</label>
-                    <ul>
-                      <li>
-                        Volumes:{" "}
-                        {Math.round(view.weekly[channel.name + ".pVolumes"]) ||
-                          "N/A"}
-                      </li>
-                      <li>
-                        AHT:{" "}
-                        {Math.round(view.weekly[channel.name + ".pAHT"]) ||
-                          "N/A"}
-                      </li>
-                    </ul>
-                    <br></br>
-                    <label className="label">Shrinkage</label>
-                    <ul>
-                      <li>AUX: {view.weekly.pAux} % of Logged</li>
-                      <li>
-                        ABS: {view.weekly.pAbs} % of{" "}
-                        {selection.get("capPlan") &&
-                        selection.get("capPlan").staffing &&
-                        selection.get("capPlan").staffing.absFromTotal
-                          ? "Total"
-                          : "Scheduled"}
-                      </li>
-                      <li>OFF: {view.weekly.pOff} % of Total</li>
-                    </ul>
-                  </div>
-                  <div className="column has-text-centered">
-                    <div>
-                      <div className="field">
-                        <button
-                          className={`button is-small is-rounded is-light ${
-                            view.selected === "agents" && "is-primary"
-                          }`}
-                          onClick={() =>
-                            setView({ ...view, selected: "agents" })
-                          }
-                        >
-                          Agents
-                        </button>
 
-                        <button
-                          className={`button is-small is-rounded is-light ${
-                            view.selected === "volumes" && "is-primary"
-                          }`}
-                          onClick={() =>
-                            setView({ ...view, selected: "volumes" })
-                          }
-                        >
-                          Volumes
-                        </button>
+                      <br></br>
+                      <label className="label has-text-danger">
+                        {channel.name + " Requirements"}
+                      </label>
+                      <ul>
+                        <li>
+                          Total Requirement:{" "}
+                          <span className="has-text-link">
+                            {Math.round(channel.values.totalReq * 10) / 10}
+                          </span>
+                        </li>
 
-                        <button
-                          className={`button is-small is-rounded is-light ${
-                            view.selected === "aht" && "is-primary"
-                          }`}
-                          onClick={() => setView({ ...view, selected: "aht" })}
-                        >
-                          AHT
-                        </button>
+                        {channel.values.peakReq && (
+                          <>
+                            <li>
+                              Peak Requirement:{" "}
+                              <span className="has-text-danger">
+                                {Math.round(
+                                  (channel.values.peakReq.scheduled.agents ||
+                                    channel.values.peakReq.scheduled.agents) *
+                                    10
+                                ) / 10}
+                              </span>{" "}
+                            </li>
+                            <li>
+                              Peak Time:{" "}
+                              <span className="has-text-primary">
+                                {channel.values.peakReq.interval}, Weekday{" "}
+                                {channel.values.peakReq.weekday}
+                              </span>
+                            </li>
+                          </>
+                        )}
+                        <li>
+                          Surplus:{" "}
+                          <span className="has-text-success">
+                            {Math.round(channel.values.totalSurplus * 10) /
+                              10 || channel.values.totalSurplus}
+                          </span>
+                        </li>
+                        <li>
+                          Real Surplus (w/ Blend Occ):{" "}
+                          <span className="has-text-success">
+                            {Math.round(channel.values.totalRealSurplus * 10) /
+                              10 || channel.values.totalSurplus}
+                          </span>
+                        </li>
+                        <br></br>
+                      </ul>
+                      <br></br>
+                      <label className="label">Volumes & Targets</label>
+                      <ul>
+                        <li>
+                          Volumes:{" "}
+                          {Math.round(
+                            view.weekly[channel.name + ".pVolumes"]
+                          ) || "N/A"}
+                        </li>
+                        <li>
+                          AHT:{" "}
+                          {Math.round(view.weekly[channel.name + ".pAHT"]) ||
+                            "N/A"}
+                        </li>
+                        <li>
+                          SL: {channel.sl ? channel.sl * 100 + "%" : "N/A"}
+                        </li>
+                        <li>TT: {channel.tt ? channel.tt + '"' : "N/A"}</li>
+                        <li>
+                          Occupancy:{" "}
+                          {channel.occ ? channel.occ * 100 + "%" : "N/A"}
+                        </li>
+                        <li>
+                          Concurrency: {channel.conc ? channel.conc : "N/A"}
+                        </li>
+                      </ul>
+                      <br></br>
+                      <label className="label">Shrinkage</label>
+                      <ul>
+                        <li>AUX: {view.weekly.pAux} % of Logged</li>
+                        <li>
+                          ABS: {view.weekly.pAbs} % of{" "}
+                          {selection.get("capPlan") &&
+                          selection.get("capPlan").staffing &&
+                          selection.get("capPlan").staffing.absFromTotal
+                            ? "Total"
+                            : "Scheduled"}
+                        </li>
+                        <li>OFF: {view.weekly.pOff} % of Total</li>
+                      </ul>
+                    </div>
+                    <div className="column has-text-centered">
+                      <div>
+                        <div className="field">
+                          <button
+                            className={`button is-small is-rounded is-light ${
+                              view.selected === "agents" && "is-primary"
+                            }`}
+                            onClick={() =>
+                              setView({ ...view, selected: "agents" })
+                            }
+                          >
+                            Agents
+                          </button>
 
-                        <button
-                          className={`button is-small is-rounded is-light ${
-                            view.selected === "sl" && "is-primary"
-                          }`}
-                          onClick={() => setView({ ...view, selected: "sl" })}
-                        >
-                          Service Level
-                        </button>
-                        <button
-                          className={`button is-small is-rounded is-light ${
-                            view.selected === "occupancy" && "is-primary"
-                          }`}
-                          onClick={() =>
-                            setView({ ...view, selected: "occupancy" })
-                          }
-                        >
-                          Occupancy
-                        </button>
+                          <button
+                            className={`button is-small is-rounded is-light ${
+                              view.selected === "volumes" && "is-primary"
+                            }`}
+                            onClick={() =>
+                              setView({ ...view, selected: "volumes" })
+                            }
+                          >
+                            Volumes
+                          </button>
+
+                          <button
+                            className={`button is-small is-rounded is-light ${
+                              view.selected === "aht" && "is-primary"
+                            }`}
+                            onClick={() =>
+                              setView({ ...view, selected: "aht" })
+                            }
+                          >
+                            AHT
+                          </button>
+
+                          <button
+                            className={`button is-small is-rounded is-light ${
+                              view.selected === "sl" && "is-primary"
+                            }`}
+                            onClick={() => setView({ ...view, selected: "sl" })}
+                          >
+                            Service Level
+                          </button>
+                          <button
+                            className={`button is-small is-rounded is-light ${
+                              view.selected === "occupancy" && "is-primary"
+                            }`}
+                            onClick={() =>
+                              setView({ ...view, selected: "occupancy" })
+                            }
+                          >
+                            Occupancy
+                          </button>
+                          <button
+                            className={`button is-small is-rounded is-light ${
+                              view.selected === "surplus" && "is-primary"
+                            }`}
+                            onClick={() =>
+                              setView({ ...view, selected: "surplus" })
+                            }
+                          >
+                            Surplus
+                          </button>
+                        </div>
                       </div>
+                      <br></br>
+                      <div style={{ maxHeight: "90vh", overflowY: "scroll" }}>
+                        <Heatmap
+                          xArray={[
+                            { label: "SUN", value: 1 },
+                            { label: "MON", value: 2 },
+                            { label: "TUE", value: 3 },
+                            { label: "WED", value: 4 },
+                            { label: "THU", value: 5 },
+                            { label: "FRI", value: 6 },
+                            { label: "SAT", value: 7 },
+                          ]}
+                          xField="weekday"
+                          yField="interval"
+                          yArray={[
+                            ...new Set(
+                              channel.data.map((item) => item.interval)
+                            ),
+                          ]}
+                          data={channel.data.map((item) => {
+                            return { ...item, ...item.net }
+                          })}
+                          value={view.selected}
+                        />
+                      </div>
+                      <br></br>
+                      <br></br>
                     </div>
-                    <br></br>
-                    <div style={{ maxHeight: "90vh", overflowY: "scroll" }}>
-                      <Heatmap
-                        xArray={[
-                          { label: "SUN", value: 1 },
-                          { label: "MON", value: 2 },
-                          { label: "TUE", value: 3 },
-                          { label: "WED", value: 4 },
-                          { label: "THU", value: 5 },
-                          { label: "FRI", value: 6 },
-                          { label: "SAT", value: 7 },
-                        ]}
-                        xField="weekday"
-                        yField="interval"
-                        yArray={[
-                          ...new Set(channel.data.map((item) => item.interval)),
-                        ]}
-                        data={channel.data.map((item) => {
-                          return { ...item, ...item.scheduled }
-                        })}
-                        value={view.selected}
-                      />
-                    </div>
-                    <br></br>
-                    <br></br>
                   </div>
                 </div>
-              </div>
-            ))}
+              ) : (
+                <div>
+                  <br></br>
+                  <div className="columns ">
+                    <div className=" column is-narrow mr-5">
+                      <label className="label has-text-danger">
+                        {channel.name + " Requirements"}
+                      </label>
+                      <ul>
+                        <li>
+                          Total Requirement:{" "}
+                          <span className="has-text-link">
+                            {Math.round(channel.values.totalReq * 10) / 10}
+                          </span>
+                        </li>
+                        <li>
+                          Total Hours:{" "}
+                          <span className="has-text-danger">
+                            {Math.round(channel.values.totalHours * 10) / 10}
+                          </span>
+                        </li>
+                        <li>
+                          Net Hours:{" "}
+                          <span className="has-text-primary">
+                            {Math.round(channel.values.netHours * 10) / 10}
+                          </span>
+                        </li>
+                      </ul>
+                    </div>
+                    <div className="column is-narrow mr-5">
+                      <label className="label">Volumes & Targets</label>
+                      <ul>
+                        <li>
+                          Volumes:{" "}
+                          {Math.round(
+                            view.weekly[channel.name + ".pVolumes"]
+                          ) || "N/A"}
+                        </li>
+                        <li>
+                          AHT:{" "}
+                          {Math.round(view.weekly[channel.name + ".pAHT"]) ||
+                            "N/A"}
+                        </li>
+                        <li>
+                          SL: {channel.sl ? channel.sl * 100 + "%" : "N/A"}
+                        </li>
+                        <li>TT: {channel.tt ? channel.tt + '"' : "N/A"}</li>
+                        <li>
+                          Occupancy:{" "}
+                          {channel.occ ? channel.occ * 100 + "%" : "N/A"}
+                        </li>
+                        <li>
+                          Concurrency: {channel.conc ? channel.conc : "N/A"}
+                        </li>
+                      </ul>
+                    </div>
+                    <div className=" column is-narrow">
+                      <label className="label">Shrinkage</label>
+                      <ul>
+                        <li>AUX: {view.weekly.pAux} % of Logged</li>
+                        <li>
+                          ABS: {view.weekly.pAbs} % of{" "}
+                          {selection.get("capPlan") &&
+                          selection.get("capPlan").staffing &&
+                          selection.get("capPlan").staffing.absFromTotal
+                            ? "Total"
+                            : "Scheduled"}
+                        </li>
+                        <li>OFF: {view.weekly.pOff} % of Total</li>
+                      </ul>
+                    </div>
+                  </div>
+                  <br></br>
+                  <br></br>
+                  <br></br>
+                </div>
+              )
+            )}
           </>
         ) : view.type === "res" ? (
           <></>
