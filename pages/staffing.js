@@ -395,14 +395,12 @@ export default function Staffing() {
             {view.requirements.map((channel) =>
               channel.live === "TRUE" ? (
                 <div>
-                  <div className="columns">
+                  <div className="columns box">
                     <div className="column is-narrow">
-                      <br></br>
-
-                      <br></br>
-                      <label className="label has-text-danger">
-                        {channel.name + " Requirements"}
+                      <label className="label has-text-danger is-size-3">
+                        {channel.name}
                       </label>
+                      <label className="label">Requirement</label>
                       <ul>
                         <li>
                           Total Requirement:{" "}
@@ -446,7 +444,6 @@ export default function Staffing() {
                               10 || channel.values.totalSurplus}
                           </span>
                         </li>
-                        <br></br>
                       </ul>
                       <br></br>
                       <label className="label">Volumes & Targets</label>
@@ -580,19 +577,21 @@ export default function Staffing() {
                           value={view.selected}
                         />
                       </div>
-                      <br></br>
-                      <br></br>
                     </div>
                   </div>
+                  <br></br>
+                  <br></br>
                 </div>
               ) : (
                 <div>
-                  <br></br>
-                  <div className="columns ">
+                  <div className="columns box is-multiline">
                     <div className=" column is-narrow mr-5">
-                      <label className="label has-text-danger">
-                        {channel.name + " Requirements"}
+                      <label className="label has-text-danger is-size-3">
+                        {channel.name}
                       </label>
+                    </div>
+                    <div className=" column is-narrow mr-5">
+                      <label className="label">Offline Requirement</label>
                       <ul>
                         <li>
                           Total Requirement:{" "}
@@ -627,17 +626,6 @@ export default function Staffing() {
                           AHT:{" "}
                           {Math.round(view.weekly[channel.name + ".pAHT"]) ||
                             "N/A"}
-                        </li>
-                        <li>
-                          SL: {channel.sl ? channel.sl * 100 + "%" : "N/A"}
-                        </li>
-                        <li>TT: {channel.tt ? channel.tt + '"' : "N/A"}</li>
-                        <li>
-                          Occupancy:{" "}
-                          {channel.occ ? channel.occ * 100 + "%" : "N/A"}
-                        </li>
-                        <li>
-                          Concurrency: {channel.conc ? channel.conc : "N/A"}
                         </li>
                       </ul>
                     </div>
