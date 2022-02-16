@@ -195,15 +195,19 @@ const useErlang = () => {
 		return required
 	}
 
-	const getBORequired = (vol, aht, shrink) => {
+	const getBORequired = (vol, aht, shrink, occ) => {
 		if (vol) {
 			let hours = (vol * aht) / 3600
+
+			if (occ) {
+				hours /= occ
+			}
 
 			if (shrink) {
 				hours /= 1 - shrink
 			}
 
-			return { hours: hours, volumes: vol, aht: aht }
+			return { hours: hours, volumes: vol, aht: aht, occ: occ }
 		} else {
 			console.log("No Volumes")
 			return {}
@@ -247,6 +251,7 @@ const useErlang = () => {
 					targets,
 					entry.minAgents
 				),
+
 				net: getLiveRequired(
 					entry.vDist * vol,
 					entry.ahtDist * aht,
@@ -267,7 +272,6 @@ const useErlang = () => {
 		off,
 		aux,
 		absFromTotal,
-		occ,
 	}) => {
 		let usedAux = aux
 		let usedAbs = absFromTotal ? abs : 1 - abs * (1 - off)
@@ -277,9 +281,9 @@ const useErlang = () => {
 		let totalShrink = 1 - (1 - usedAux) * (1 - usedAbs - off)
 
 		return {
-			scheduled: getBORequired(vol, aht, scheduledShrink, occ),
-			total: getBORequired(vol, aht, totalShrink, occ),
-			net: getBORequired(vol, aht, 0, occ),
+			scheduled: getBORequired(vol, aht, scheduledShrink),
+			total: getBORequired(vol, aht, totalShrink),
+			net: getBORequired(vol, aht, 0),
 		}
 	}
 
@@ -302,7 +306,7 @@ const useErlang = () => {
 					},
 					total: {
 						agents: item.total.agents || 0,
-						surplus: item.scheduled.surplus,
+						surplus: item.total.surplus,
 					},
 				}
 			})
@@ -342,11 +346,11 @@ const useErlang = () => {
 			requirements.forEach((slot) => {
 				if (slot.total && slot.total.agents) {
 					totalAccumulator += slot.total.agents || 0
-					surplusAccumulator += slot.net.surplus || 0
+					surplusAccumulator += slot.total.surplus || 0
 
 					if (blendOcc > slot.net.occupancy) {
 						realSurplusAccumulator +=
-							slot.net.agents * (blendOcc - slot.net.occupancy)
+							slot.total.agents * (blendOcc - slot.total.occupancy)
 					}
 
 					if (peak === null && slot.total.agents) {
