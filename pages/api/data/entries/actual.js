@@ -93,7 +93,7 @@ export default async function handler(req, res) {
         actual: newActual,
         lastUpdated: new Date(),
         updatedBy: verification.user.username,
-        updateType: "planned",
+        updateType: "actual",
       },
     }
     const options = { upsert: true }
