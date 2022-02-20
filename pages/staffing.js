@@ -12,6 +12,7 @@ import useErlang from "../hooks/useErlang"
 import CSVUploader from "../components/files/CSVUploader"
 import { useAuth } from "../contexts/authContext"
 import Heatmap from "../components/staffing/heatmap"
+import PlannedModal from "../components/entries/PlannedModal"
 
 const selectionFields = [
   { name: "project", default: null, required: true, type: "object", level: 1 },
@@ -33,7 +34,7 @@ export default function Staffing() {
 
   const [shrinkage, setShrinkage] = useState([])
 
-  const [volumesAndAHT, setVolumesAndAHT] = useState([])
+  const [modal, setModal] = useState({ active: false, channel: null })
 
   const data = useData(["projects", "lobs", "capPlans"])
 
@@ -83,6 +84,8 @@ export default function Staffing() {
         alert(data.message)
       })
       .catch((err) => console.log(err))
+
+    setLocked(false)
 
     data.refresh()
   }
@@ -220,11 +223,34 @@ export default function Staffing() {
     })
   }
 
+  const handleToggleModal = (channel) => {
+    if (modal.active) {
+      handleToggleLock()
+      setModal({
+        active: false,
+        channel: null,
+      })
+    } else if (channel) {
+      setModal({
+        active: true,
+        channel: channel,
+      })
+    }
+  }
+
   return (
     <>
       <Head>
         <title>Planning App | Staffing</title>
       </Head>
+
+      <PlannedModal
+        selection={selection}
+        week={selection.get("week")}
+        active={modal.active}
+        toggle={handleToggleModal}
+        channel={modal.channel}
+      />
 
       <div>
         <h1 className="has-text-centered mb-2 is-size-5">STAFFING</h1>
@@ -326,6 +352,7 @@ export default function Staffing() {
               </div>
             </div>
           </div>
+
           <div className="column is-half">
             <div className="has-text-right">
               <label className="label">Shrinkage</label>
@@ -400,6 +427,7 @@ export default function Staffing() {
                         {channel.name}
                       </label>
                       <label className="label">Requirement</label>
+
                       <ul>
                         <li>
                           Total Requirement:{" "}
@@ -444,6 +472,20 @@ export default function Staffing() {
                           </span>
                         </li>
                       </ul>
+                      <button
+                        className={"button is-small is-info is-fullwidth my-3"}
+                        onClick={() =>
+                          handleSubmit({
+                            capPlan: selection.get("capPlan")._id,
+                            week: selection.get("week").code,
+                            required:
+                              Math.round(channel.values.totalReq * 10) / 10 ||
+                              null,
+                          })
+                        }
+                      >
+                        SET ENTRY
+                      </button>
                       <br></br>
                       <label className="label">Volumes & Targets</label>
                       <ul>
@@ -470,6 +512,16 @@ export default function Staffing() {
                           Concurrency: {channel.conc ? channel.conc : "N/A"}
                         </li>
                       </ul>
+                      {!["Bolt On", "Blended"].includes(channel.name) && (
+                        <button
+                          className={
+                            "button is-small is-primary is-fullwidth my-3"
+                          }
+                          onClick={() => handleToggleModal(channel.name)}
+                        >
+                          ADJUSTMENTS
+                        </button>
+                      )}
                       <br></br>
                       <label className="label">Shrinkage</label>
                       <ul>
@@ -484,36 +536,6 @@ export default function Staffing() {
                         </li>
                         <li>OFF: {view.weekly.pOff} % of Total</li>
                       </ul>
-                      <button
-                        className={
-                          "button is-small is-danger is-rounded is-light is-fullwidth mt-3"
-                        }
-                        onClick={() =>
-                          handleSubmit({
-                            capPlan: selection.get("capPlan")._id,
-                            week: selection.get("week").code,
-                            required:
-                              Math.round(channel.values.totalReq * 10) / 10 ||
-                              null,
-                          })
-                        }
-                      >
-                        Add Total to Entry
-                      </button>
-                      <button
-                        className={
-                          "button is-small is-danger is-rounded is-light is-fullwidth mt-3"
-                        }
-                        onClick={() =>
-                          handleSubmit({
-                            required:
-                              Math.round(channel.values.totalReq * 10) / 10 ||
-                              null,
-                          })
-                        }
-                      >
-                        Add Peak to Entry
-                      </button>
                     </div>
                     <div className="column has-text-centered">
                       <div>
@@ -618,6 +640,14 @@ export default function Staffing() {
                       <label className="label has-text-danger is-size-3">
                         {channel.name}
                       </label>
+                      <button
+                        className={
+                          "button is-small is-primary is-fullwidth my-3"
+                        }
+                        onClick={() => handleToggleModal(channel.name)}
+                      >
+                        ADJUSTMENTS
+                      </button>
                     </div>
                     <div className=" column is-narrow mr-5">
                       <label className="label">Offline Requirement</label>
