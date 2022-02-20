@@ -1,4 +1,4 @@
-import EntriyForm from "./EntryForm"
+import EntryForm from "./EntryForm"
 
 const EntriesModal = ({ active, toggle, selection, week }) => {
   return (
@@ -25,7 +25,7 @@ const EntriesModal = ({ active, toggle, selection, week }) => {
           <section className="modal-card-body pb-0 pt-2">
             <div>
               {active && selection.get("capPlan") && week ? (
-                <EntriyForm selection={selection} week={week} />
+                <EntryForm selection={selection} week={week} />
               ) : (
                 <h3>loading</h3>
               )}

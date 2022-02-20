@@ -36,7 +36,7 @@ const targetFields = ["billable", "forecasted", "budget", "required"]
 
 const actualFields = ["actOff", "actAbs", "actAux"]
 
-const EntriyForm = ({ selection, week }) => {
+const EntryForm = ({ selection, week }) => {
   const [entry, setEntry] = useState(null)
   const [loaded, setLoaded] = useState(false)
   const [formInfo, setFormInfo] = useState({})
@@ -241,45 +241,7 @@ const EntriyForm = ({ selection, week }) => {
               </div>
             ))}
           </div>
-          {/*
-          <label>STAFFING</label>
-          <div className="columns is-multiline is-mobile pt-2">
-            {staffingFields.map((field) => (
-              <div
-                key={`Col-${field}`}
-                className="column is-6-mobile is-2 py-0"
-              >
-                <label>{field}</label>
-                <div className="field has-addons">
-                  <p className="control">
-                    <input
-                      readOnly={true}
-                      className={`input is-rounded is-small has-text-light ${
-                        entry && entry[field]
-                          ? "has-background-info"
-                          : "has-background-grey-lighter"
-                      }`}
-                      aria-label={field}
-                      value={(entry && entry[field]) || "none"}
-                    />
-                  </p>
-                  <p className="control">
-                    <input
-                      className={
-                        "input is-rounded is-small " +
-                        (formInfo[field] ? "is-danger" : "")
-                      }
-                      aria-label={field}
-                      value={formInfo[field] || ""}
-                      disabled={!week}
-                      onChange={(e) => handleChange(e, field)}
-                    />
-                  </p>
-                </div>
-              </div>
-            ))}
-          </div>
-					*/}
+
           <label>ACTUALS</label>
           <div className="columns is-multiline is-mobile pt-2">
             {actualFields.map((field) => (
@@ -373,4 +335,4 @@ const EntriyForm = ({ selection, week }) => {
   )
 }
 
-export default EntriyForm
+export default EntryForm

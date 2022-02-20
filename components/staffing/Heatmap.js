@@ -19,7 +19,10 @@ const Heatmap = ({ xArray, yArray, data, value }) => {
       <thead>
         <tr>
           <th style={{ width: "12.5%" }}>#</th>
-          {xArray && xArray.map((item) => <th>{item.label}</th>)}
+          {xArray &&
+            xArray.map((item) => (
+              <th key={`header-${item.label}`}>{item.label}</th>
+            ))}
         </tr>
       </thead>
       <tbody>
