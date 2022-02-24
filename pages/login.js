@@ -38,7 +38,7 @@ export default function Login() {
   return (
     <>
       <Head>
-        <title>Sitel Planner | User</title>
+        <title>Planning App | Login</title>
       </Head>
       <div className="mt-auto mb-auto">
         <div className="columns">
