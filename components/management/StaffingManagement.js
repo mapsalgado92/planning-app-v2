@@ -185,7 +185,7 @@ const StaffingManagement = ({ data }) => {
 									type="number"
 									className="input is-small mx-1 is-rounded "
 									style={{ maxWidth: "7em" }}
-									value={form.get("fteHours") || 40}
+									value={form.get("fteHours") || ""}
 									onChange={(e) => {
 										form.set("fteHours", e.target.value)
 									}}
