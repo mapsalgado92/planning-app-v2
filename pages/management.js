@@ -10,79 +10,75 @@ import StaffingManagement from "../components/management/StaffingManagement"
 import EntriesManagement from "../components/management/EntriesManagement"
 
 export default function Management() {
-  const [screen, setScreen] = useState("projects")
+	const [screen, setScreen] = useState("projects")
 
-  const data = useData(["projects", "lobs", "capPlans", "languages", "fields"])
+	const data = useData(["projects", "lobs", "capPlans", "languages", "fields"])
 
-  const auth = useAuth()
+	const auth = useAuth()
 
-  return (
-    <>
-      <Head>
-        <title>Planning App | Management</title>
-      </Head>
-      <div>
-        <h1 className="has-text-centered mb-2 is-size-5">MANAGEMENT</h1>
-        <div className="columns">
-          <div className="column is-narrow" style={{ minWidth: "200px" }}>
-            <div className="panel">
-              <h2 className="panel-heading is-size-6">
-                {screen.toUpperCase()}
-              </h2>
-              <a
-                className=" panel-block "
-                onClick={() => {
-                  setScreen("projects")
-                }}
-              >
-                Projects
-              </a>
-              <a className=" panel-block " onClick={() => setScreen("lobs")}>
-                Lobs
-              </a>
-              <a
-                className=" panel-block "
-                onClick={() => setScreen("capPlans")}
-              >
-                Cap Plans
-              </a>
-              <a
-                className=" panel-block "
-                onClick={() => setScreen("entries")}
-              >
-                Entries
-              </a>
-              <a
-                className=" panel-block "
-                onClick={() => setScreen("staffing")}
-              >
-                Staffing
-              </a>
-              
-            </div>
-          </div>
-          <div className="column">
-            {!auth.permission(2) ? (
-              <div className="message is-danger is-size-5 px-5 py-5">
-                <span className="">
-                  <FaLock />
-                </span>{" "}
-                UNAUTHORIZED ACCESS
-              </div>
-            ) : screen === "projects" ? (
-              <ProjectManagement data={data} />
-            ) : screen === "lobs" ? (
-              <LobManagement data={data} />
-            ) : screen === "capPlans" ? (
-              <CapPlanManagement data={data} />
-            ) : screen === "entries" ? (
-              <EntriesManagement data={data} />
-            ): (
-              <StaffingManagement data={data} />
-            )}
-          </div>
-        </div>
-      </div>
-    </>
-  )
+	return (
+		<>
+			<Head>
+				<title>Planning App | Management</title>
+			</Head>
+			<div>
+				<h1 className="has-text-centered mb-2 is-size-5">MANAGEMENT</h1>
+				<div className="columns">
+					<div className="column is-narrow" style={{ minWidth: "200px" }}>
+						<div className="panel">
+							<h2 className="panel-heading is-size-6">
+								{screen.toUpperCase()}
+							</h2>
+							<a
+								className=" panel-block "
+								onClick={() => {
+									setScreen("projects")
+								}}
+							>
+								Projects
+							</a>
+							<a className=" panel-block " onClick={() => setScreen("lobs")}>
+								Lobs
+							</a>
+							<a
+								className=" panel-block "
+								onClick={() => setScreen("capPlans")}
+							>
+								Cap Plans
+							</a>
+							<a className=" panel-block " onClick={() => setScreen("entries")}>
+								Entries
+							</a>
+							<a
+								className=" panel-block "
+								onClick={() => setScreen("staffing")}
+							>
+								Staffing
+							</a>
+						</div>
+					</div>
+					<div className="column">
+						{!auth.permission(2) ? (
+							<div className="message is-danger is-size-5 px-5 py-5">
+								<span className="">
+									<FaLock />
+								</span>{" "}
+								UNAUTHORIZED ACCESS
+							</div>
+						) : screen === "projects" ? (
+							<ProjectManagement data={data} />
+						) : screen === "lobs" ? (
+							<LobManagement data={data} />
+						) : screen === "capPlans" ? (
+							<CapPlanManagement data={data} />
+						) : screen === "entries" ? (
+							<EntriesManagement data={data} />
+						) : (
+							<StaffingManagement data={data} />
+						)}
+					</div>
+				</div>
+			</div>
+		</>
+	)
 }
