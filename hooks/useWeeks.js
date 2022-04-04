@@ -7,7 +7,6 @@ const useWeeks = () => {
     const response = await fetch(`/api/data/structures?selected=weeks`)
       .then((res) => res.json())
       .then((fetched) => {
-        console.log("THIS IS DATA", fetched.data.weeks)
         fetched.data.weeks
           ? setWeeks(
               fetched.data.weeks.sort((a, b) =>

@@ -3,11 +3,10 @@ import { useState } from "react"
 import useData from "../hooks/useData"
 import useForm from "../hooks/useForm"
 import StructureDropdown from "../components/selection/StructureDropdown"
-
-import { FaExternalLinkAlt } from "react-icons/fa"
 import useWeeks from "../hooks/useWeeks"
-import useCapacity from "../hooks/useCapacity"
 import WeekDropdown from "../components/selection/WeekDropdown"
+import Filter from "../components/selection/Filter"
+import { CSVDownloader } from "react-papaparse"
 
 const selectionFields = [
   { name: "project", default: null, required: true, type: "object", level: 1 },
@@ -24,60 +23,69 @@ const selectionFields = [
 ]
 
 const Report = () => {
-  const [weekRange, setWeekRange] = useState([])
-  const [active, setActive] = useState(false)
-  const [channelFields, setChannelFields] = useState([])
+  const [fields, setFields] = useState([])
+  const [report, setReport] = useState([])
+  const [generated, setGenerated] = useState(false)
 
   const data = useData(["projects", "lobs", "capPlans", "languages", "fields"])
 
   const weeks = useWeeks()
 
-  const capacity = useCapacity()
-
   const selection = useForm({
     fields: selectionFields,
   })
-  const handleGenerate = () => {
-    let capPlan = selection.get("capPlan")
 
-    if (capPlan.staffing && capPlan.staffing.channels) {
-      setChannelFields(
-        capPlan.staffing.channels.map((channel, index) => {
-          return [
-            {
-              internal: channel.name + ".pVolumes",
-              external: `P. Volumes (${channel.name})`,
-              order: 1007 + index / 10 + 1 / 100,
-              type: "staffing",
-            },
-            {
-              internal: channel.name + ".pAHT",
-              external: `P. AHT (${channel.name})`,
-              order: 1007 + index / 10 + 2 / 100,
-              type: "staffing",
-            },
-            {
-              internal: channel.name + ".actVolumes",
-              external: `Act. Volumes (${channel.name})`,
-              order: 1007 + index / 10 + 3 / 100,
-              type: "staffing",
-            },
-            {
-              internal: channel.name + ".actAHT",
-              external: `Act. AHT (${channel.name})`,
-              order: 1007 + index / 10 + 4 / 100,
-              type: "staffing",
-            },
-          ]
-        })
+  const handleGenerate = async () => {
+    let lobs = []
+
+    if (selection.get("lob")._id) {
+      lobs = data.lobs.filter((lob) => lob._id === selection.get("lob")._id)
+    } else {
+      lobs = data.lobs.filter(
+        (lob) => lob.project === selection.get("project")._id
       )
     }
 
-    capacity.generate(capPlan)
-    let from = selection.get("fromWeek")
-    let to = selection.get("toWeek")
-    setWeekRange(weeks.getWeekRange(from.code, to.code))
+    console.log("LOBS:", lobs)
+
+    let capPlans = lobs
+      .map((lob) =>
+        data.capPlans
+          .filter((capPlan) => capPlan.lob === lob._id)
+          .map((capPlan) => ({ _id: capPlan._id, name: capPlan.name }))
+      )
+
+      .flat()
+
+    console.log("Cap Plans:", capPlans)
+
+    await fetch(
+      `/api/capacity/multiple?from=${selection.get("fromWeek").code}&to=${
+        selection.get("toWeek").code
+      }&selected=${capPlans.map((capPlan) => capPlan._id).join("+")}`
+    )
+      .then((res) => res.json())
+      .then((data) => {
+        setReport(
+          data.multiple.map((weekly) => {
+            let projection = {
+              week_code: weekly.week,
+              week_start: weekly.firstDate,
+              cap_plan_name: weekly.capPlan,
+              cap_plan_id: weekly.capPlanId,
+            }
+
+            fields.forEach((field) => {
+              projection[field.payload.internal] =
+                weekly[field.payload.internal] || null
+            })
+            return projection
+          })
+        )
+        setGenerated(true)
+      })
   }
+
   return (
     <>
       <Head>
@@ -97,6 +105,7 @@ const Report = () => {
               reset={["lob", "capPlan"]}
               callback={(f) => {
                 f.resetAll()
+                setGenerated(false)
               }}
             />
             <StructureDropdown
@@ -112,6 +121,9 @@ const Report = () => {
                   ),
                 ]
               }
+              callback={(f) => {
+                setGenerated(false)
+              }}
               disabled={!selection.get("project")}
             />
           </div>
@@ -132,6 +144,8 @@ const Report = () => {
                 ) {
                   f.setMany({ ...f.getForm(), toWeek: s, fromWeek: s })
                 }
+
+                setGenerated(false)
               }}
             />
             <WeekDropdown
@@ -147,6 +161,7 @@ const Report = () => {
                 ) {
                   f.setMany({ ...f.getForm(), toWeek: s, fromWeek: s })
                 }
+                setGenerated(false)
               }}
             />
             <button
@@ -165,6 +180,37 @@ const Report = () => {
         </div>
         <div className="columns">
           <div className="column field">
+            <label className="label">Fields</label>
+            <Filter
+              items={
+                data.fields &&
+                data.fields
+                  .sort((a, b) =>
+                    a.order === b.order
+                      ? 0
+                      : parseInt(a.order) < parseInt(b.order)
+                      ? -1
+                      : 1
+                  )
+                  .map((field) => ({
+                    name: field.external,
+                    payload: field,
+                  }))
+              }
+              styles={{
+                button: "button is-small is-rounded mr-1 mb-1",
+                selected: "is-danger",
+              }}
+              onChange={(selected) => {
+                setFields(selected)
+                setGenerated(false)
+              }}
+            />
+          </div>
+        </div>
+
+        <div className="columns">
+          <div className="column field">
             <button
               className="button is-primary is-small is-rounded"
               onClick={handleGenerate}
@@ -172,9 +218,35 @@ const Report = () => {
             >
               Generate Report
             </button>
+            <br></br>
+            <br></br>
+            {generated && selection.get("project") && selection.get("lob") && (
+              <CSVDownloader
+                filename={`Report_${selection
+                  .get("project")
+                  .name.split(" ")
+                  .join("_")}_${
+                  selection.get("lob").name === "SELECT ALL"
+                    ? "All_LOBs"
+                    : selection.get("lob").name.split(" ").join("_")
+                }_(${new Date().toISOString()})`}
+                data={() => {
+                  return report
+                }}
+              >
+                <button
+                  className="button is-link is-small is-rounded"
+                  disabled={!generated}
+                >
+                  Download
+                </button>
+              </CSVDownloader>
+            )}
           </div>
         </div>
       </div>
+      <br></br>
+      <br></br>
     </>
   )
 }

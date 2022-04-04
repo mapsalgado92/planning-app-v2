@@ -32,7 +32,6 @@ export default async function handler(req, res) {
         .find({ capPlan: id })
         .toArray()
 
-
       let weeks = await db
         .collection("weeks")
         .find({})
@@ -45,6 +44,8 @@ export default async function handler(req, res) {
           1 + weeks.indexOf(weeks.find((week) => week.code === toWeek))
         )
       }
+
+      console.log("CAP PLAN", capPlan)
 
       let capacity = generateCapacity(capPlan, entries, weeks)
 
