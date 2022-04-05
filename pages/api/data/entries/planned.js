@@ -68,25 +68,30 @@ export default async function handler(req, res) {
 			currentPlanned = entry.planned || []
 		}
 
-		let newPlanned = newPlanned.find((planned) => planned.name === payload.name)
-			? currentPlanned.map((planned) => {
-					if (planned.name === payload.name) {
-						return {
-							name: payload.name,
-							aht: payload.aht === "delete" ? null : payload.aht || planned.aht,
-							volumes:
-								payload.volumes === "delete"
-									? null
-									: payload.volumes || planned.volumes,
-						}
-					} else {
-						return planned
-					}
-			  })
-			: [...currentPlanned, change]
+		let newPlanned
 
-		if (newPlanned.length === 0) {
+		if (currentPlanned.length === 0) {
 			newPlanned = [payload]
+		} else if (!newPlanned.find((item) => item.name === payload.name)) {
+			newPlanned = [...newPlanned, payload]
+		} else {
+			newPlanned = currentPlanned.map((channelPlanned) => {
+				if (channelPlanned.name === payload.name) {
+					return {
+						name: payload.name,
+						aht:
+							payload.aht === "delete"
+								? null
+								: payload.aht || channelPlanned.aht,
+						volumes:
+							payload.volumes === "delete"
+								? null
+								: payload.volumes || channelPlanned.volumes,
+					}
+				} else {
+					return channelPlanned
+				}
+			})
 		}
 
 		const update = {
@@ -99,15 +104,13 @@ export default async function handler(req, res) {
 		}
 		const options = { upsert: true }
 
-		console.log("newPlanned", newPlanned)
-
 		let response = await db
 			.collection("capEntries")
 			.updateOne({ capPlan: capPlanId, week: weekCode }, update, options)
 
 		return res.status(200).json({
 			message: `Updated Entry in Database!`,
-			inserted: payload,
+			inserted: update,
 			response: response,
 		})
 	} else {
