@@ -5,7 +5,7 @@ import StructureDropdown from "../selection/StructureDropdown"
 
 import { FaLock } from "react-icons/fa"
 import CSVUploader from "../files/CSVUploader"
-import Heatmap from "../staffing/heatmap"
+import Heatmap from "../staffing/Heatmap"
 
 const selectionFields = [
 	{ name: "project", default: null, required: true, type: "object", level: 1 },
