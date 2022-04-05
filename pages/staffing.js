@@ -11,7 +11,7 @@ import useErlang from "../hooks/useErlang"
 
 import CSVUploader from "../components/files/CSVUploader"
 import { useAuth } from "../contexts/authContext"
-import Heatmap from "../components/staffing/heatmap"
+import Heatmap from "../components/staffing/Heatmap"
 import PlannedModal from "../components/entries/PlannedModal"
 
 const selectionFields = [
