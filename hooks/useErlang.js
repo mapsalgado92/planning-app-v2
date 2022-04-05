@@ -214,7 +214,17 @@ const useErlang = () => {
 		}
 	}
 
-	const generateResults = ({ distros, staffing, vol, aht, abs, aux }) => {}
+	const generateResults = ({
+		distros,
+		staffing,
+		vol,
+		aht,
+		targets,
+		abs,
+		off,
+		aux,
+		absFromTotal,
+	}) => {}
 
 	const generateLiveRequirements = ({
 		distros,
