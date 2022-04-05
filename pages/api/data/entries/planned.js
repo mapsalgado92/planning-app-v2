@@ -68,12 +68,13 @@ export default async function handler(req, res) {
 			currentPlanned = entry.planned || []
 		}
 
-		let newPlanned
-
-		if (currentPlanned.length === 0) {
+		let newPlanned = []
+		console.log("FIRST", payload.name, currentPlanned)
+		if (v.length === 0) {
 			newPlanned = [payload]
-		} else if (!newPlanned.find((item) => item.name === payload.name)) {
-			newPlanned = [...newPlanned, payload]
+		} else if (!currentPlanned.find((item) => item.name === payload.name)) {
+			console.log("APPENDED")
+			newPlanned = [...currentPlanned, payload]
 		} else {
 			newPlanned = currentPlanned.map((channelPlanned) => {
 				if (channelPlanned.name === payload.name) {

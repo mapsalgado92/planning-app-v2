@@ -68,12 +68,12 @@ export default async function handler(req, res) {
 			currentActual = entry.actual || []
 		}
 
-		let newActual
+		let newActual = []
 
-		if (currentPlanned.length === 0) {
+		if (currentActual.length === 0) {
 			newActual = [payload]
-		} else if (!newActual.find((item) => item.name === payload.name)) {
-			newActual = [...newActual, payload]
+		} else if (!currentActual.find((item) => item.name === payload.name)) {
+			newActual = [...currentActual, payload]
 		} else {
 			newActual = currentActual.map((channelActual) => {
 				if (channelActual.name === payload.name) {
