@@ -68,19 +68,17 @@ export default async function handler(req, res) {
 			currentPlanned = entry.planned || []
 		}
 
-		let change = {
-			name: payload.name,
-			aht: payload.aht === "delete" ? null : payload.aht || channelPlanned.aht,
-			volumes:
-				payload.volumes === "delete"
-					? null
-					: payload.volumes || channelPlanned.volumes,
-		}
-
 		let newPlanned = newPlanned.find((planned) => planned.name === payload.name)
 			? currentPlanned.map((planned) => {
 					if (planned.name === payload.name) {
-						return change
+						return {
+							name: payload.name,
+							aht: payload.aht === "delete" ? null : payload.aht || planned.aht,
+							volumes:
+								payload.volumes === "delete"
+									? null
+									: payload.volumes || planned.volumes,
+						}
 					} else {
 						return planned
 					}

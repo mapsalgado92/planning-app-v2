@@ -68,19 +68,17 @@ export default async function handler(req, res) {
 			currentActual = entry.actual || []
 		}
 
-		let change = {
-			name: payload.name,
-			aht: payload.aht === "delete" ? null : payload.aht || channelPlanned.aht,
-			volumes:
-				payload.volumes === "delete"
-					? null
-					: payload.volumes || channelPlanned.volumes,
-		}
-
 		let newActual = newActual.find((actual) => actual.name === payload.name)
 			? currentActual.map((actual) => {
 					if (actual.name === payload.name) {
-						return change
+						return {
+							name: payload.name,
+							aht: payload.aht === "delete" ? null : payload.aht || actual.aht,
+							volumes:
+								payload.volumes === "delete"
+									? null
+									: payload.volumes || actual.volumes,
+						}
 					} else {
 						return actual
 					}
