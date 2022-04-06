@@ -60,7 +60,13 @@ export default async function handler(req, res) {
 			} catch (error) {
 				res
 					.status(500)
-					.json({ message: "Something went wrong", capPlan, weeks, entries })
+					.json({
+						message: "Something went wrong",
+						error,
+						capPlan,
+						weeks,
+						entries,
+					})
 			}
 
 			break
