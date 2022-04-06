@@ -1,7 +1,6 @@
 import fields from "../../../data-init/fields.json"
 import languages from "../../../data-init/languages.json"
 import weeks from "../../../data-init/weeks.json"
-import lobs from "../../../data-init/lobs.json"
 import { connectToDatabase } from "../../../lib/mongodb"
 import { ObjectId } from "mongodb"
 
@@ -20,15 +19,14 @@ export default async function handler(req, res) {
 		await db.collection("languages").insertMany(
 			languages.map((item) => ({ ...item, _id: ObjectId(item._id["$oid"]) })),
 			{ ordered: false }
-		)
-
-		await db.collection("weeks").insertMany(
-			weeks.map((item) => ({ ...item, _id: ObjectId(item._id["$oid"]) })),
-			{ ordered: false }
 		)*/
 
-		await db.collection("lobs").insertMany(
-			lobs.map((item) => ({ ...item, _id: ObjectId(item._id["$oid"]) })),
+		await db.collection("weeks").insertMany(
+			weeks.map((item) => ({
+				...item,
+				_id: ObjectId(item._id["$oid"]),
+				firstDate: item.firstDate["$date"],
+			})),
 			{ ordered: false }
 		)
 
