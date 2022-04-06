@@ -1,27 +1,6 @@
 import { useEffect, useState } from "react"
 
-const useWeeks = () => {
-	const [weeks, setWeeks] = useState([])
-
-	useEffect(() => {
-		fetch(`/api/data/structures?selected=weeks`)
-			.then((res) => res.json())
-			.then((fetched) => {
-				fetched.data.weeks
-					? setWeeks(
-							fetched.data.weeks.sort((a, b) =>
-								a.firstDate > b.firstDate
-									? 1
-									: a.firstDate < b.firstDate
-									? -1
-									: 0
-							)
-					  )
-					: alert(fetched)
-			})
-			.catch((error) => alert(error))
-	}, [])
-
+const useWeeks = (weeks) => {
 	const getCurrentWeek = () => {
 		let today = new Date()
 		return weeks.find((week) => week.firstDate > today.toISOString())

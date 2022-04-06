@@ -36,7 +36,7 @@ export default function Staffing() {
 
 	const [modal, setModal] = useState({ active: false, channel: null })
 
-	const data = useData(["projects", "lobs", "capPlans"])
+	const data = useData(["projects", "lobs", "capPlans", "weeks"])
 
 	const auth = useAuth()
 
@@ -44,7 +44,12 @@ export default function Staffing() {
 
 	const capacity = useCapacity()
 
-	const weeks = useWeeks()
+	const weeks = useWeeks(
+		data.weeks &&
+			data.weeks.sort((a, b) =>
+				a.firstDate > b.firstDate ? 1 : a.firstDate < b.firstDate ? -1 : 0
+			)
+	)
 
 	const selection = useForm({
 		fields: selectionFields,
