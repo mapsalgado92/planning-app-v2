@@ -11,10 +11,10 @@ export default async function handler(req, res) {
 	if (client) {
 		const options = { upsert: true }
 
-		await db.collection("fields").insertMany(
+		/*await db.collection("fields").insertMany(
 			fields.map((item) => ({ ...item, _id: ObjectId(item._id["$oid"]) })),
 			{ ordered: false }
-		)
+		)*/
 
 		await db.collection("languages").insertMany(
 			languages.map((item) => ({ ...item, _id: ObjectId(item._id["$oid"]) })),
