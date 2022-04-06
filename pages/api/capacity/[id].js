@@ -45,10 +45,12 @@ export default async function handler(req, res) {
 				)
 			}
 
-			console.log("Weeks", weeks)
+			console.log("will generate")
 
 			try {
 				let capacity = generateCapacity(capPlan, entries, weeks)
+
+				console.log(capacity)
 
 				if (capacity && fromWeek) {
 					capacity = capacity.slice(
@@ -58,15 +60,13 @@ export default async function handler(req, res) {
 
 				res.status(200).json({ message: "Capacity Generated", capacity })
 			} catch (error) {
-				res
-					.status(500)
-					.json({
-						message: "Something went wrong",
-						error,
-						capPlan,
-						weeks,
-						entries,
-					})
+				res.status(500).json({
+					message: "Something went wrong",
+					error,
+					capPlan,
+					weeks,
+					entries,
+				})
 			}
 
 			break
