@@ -70,7 +70,7 @@ export default async function handler(req, res) {
 
 		let newPlanned = []
 		console.log("FIRST", payload.name, currentPlanned)
-		if (v.length === 0) {
+		if (currentPlanned.length === 0) {
 			newPlanned = [payload]
 		} else if (!currentPlanned.find((item) => item.name === payload.name)) {
 			console.log("APPENDED")
