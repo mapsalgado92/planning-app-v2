@@ -1,6 +1,7 @@
 import fields from "../../../data-init/fields.json"
 import languages from "../../../data-init/languages.json"
 import weeks from "../../../data-init/weeks.json"
+import lobs from "../../../data-init/lobs.json"
 import { connectToDatabase } from "../../../lib/mongodb"
 import { ObjectId } from "mongodb"
 
@@ -33,7 +34,7 @@ export default async function handler(req, res) {
 
 		res.status(200).json({
 			message: `Updated Entry in Database!`,
-			inserted: { fields, weeks, languages },
+			inserted: "something",
 		})
 	} else {
 		//BAD REQUEST
