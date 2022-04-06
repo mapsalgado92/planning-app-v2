@@ -9,23 +9,22 @@ export default async function handler(req, res) {
 	console.log(client)
 
 	if (client) {
-		await db
-			.collection("fields")
-			.insertMany(
-				fields.map((item) => ({ ...item, _id: ObjectId(item._id["$oid"]) }))
-			)
+		const options = { upsert: true }
 
-		await db
-			.collection("languages")
-			.insertMany(
-				languages.map((item) => ({ ...item, _id: ObjectId(item._id["$oid"]) }))
-			)
+		await db.collection("fields").insertMany(
+			fields.map((item) => ({ ...item, _id: ObjectId(item._id["$oid"]) })),
+			{ ordered: false }
+		)
 
-		await db
-			.collection("weeks")
-			.insertMany(
-				weeks.map((item) => ({ ...item, _id: ObjectId(item._id["$oid"]) }))
-			)
+		await db.collection("languages").insertMany(
+			languages.map((item) => ({ ...item, _id: ObjectId(item._id["$oid"]) })),
+			{ ordered: false }
+		)
+
+		await db.collection("weeks").insertMany(
+			weeks.map((item) => ({ ...item, _id: ObjectId(item._id["$oid"]) })),
+			{ ordered: false }
+		)
 
 		res.status(200).json({
 			message: `Updated Entry in Database!`,

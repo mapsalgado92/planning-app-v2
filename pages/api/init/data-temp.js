@@ -11,38 +11,33 @@ export default async function handler(req, res) {
 	console.log(client)
 
 	if (client) {
-		await db
-			.collection("capEntries")
-			.insertMany(
-				capEntries.map((item) => ({ ...item, _id: ObjectId(item._id["$oid"]) }))
-			)
+		await db.collection("capEntries").insertMany(
+			capEntries.map((item) => ({ ...item, _id: ObjectId(item._id["$oid"]) })),
+			{ ordered: false }
+		)
 
-		await db
-			.collection("capPlans")
-			.insertMany(
-				capPlans.map((item) => ({ ...item, _id: ObjectId(item._id["$oid"]) }))
-			)
+		await db.collection("capPlans").insertMany(
+			capPlans.map((item) => ({ ...item, _id: ObjectId(item._id["$oid"]) })),
+			{ ordered: false }
+		)
 
-		await db
-			.collection("projects")
-			.insertMany(
-				projects.map((item) => ({ ...item, _id: ObjectId(item._id["$oid"]) }))
-			)
+		await db.collection("projects").insertMany(
+			projects.map((item) => ({ ...item, _id: ObjectId(item._id["$oid"]) })),
+			{ ordered: false }
+		)
 
-		await db
-			.collection("lobs")
-			.insertMany(
-				lobs.map((item) => ({ ...item, _id: ObjectId(item._id["$oid"]) }))
-			)
+		await db.collection("lobs").insertMany(
+			lobs.map((item) => ({ ...item, _id: ObjectId(item._id["$oid"]) })),
+			{ ordered: false }
+		)
 
-		await db
-			.collection("verification")
-			.insertMany(
-				verification.map((item) => ({
-					...item,
-					_id: ObjectId(item._id["$oid"]),
-				}))
-			)
+		await db.collection("verification").insertMany(
+			verification.map((item) => ({
+				...item,
+				_id: ObjectId(item._id["$oid"]),
+			})),
+			{ ordered: false }
+		)
 
 		res.status(200).json({
 			message: `Updated Entry in Database!`,
