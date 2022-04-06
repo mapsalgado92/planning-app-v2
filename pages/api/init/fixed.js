@@ -14,7 +14,7 @@ export default async function handler(req, res) {
 		/*await db.collection("fields").insertMany(
 			fields.map((item) => ({ ...item, _id: ObjectId(item._id["$oid"]) })),
 			{ ordered: false }
-		)*/
+		)
 
 		await db.collection("languages").insertMany(
 			languages.map((item) => ({ ...item, _id: ObjectId(item._id["$oid"]) })),
@@ -23,6 +23,11 @@ export default async function handler(req, res) {
 
 		await db.collection("weeks").insertMany(
 			weeks.map((item) => ({ ...item, _id: ObjectId(item._id["$oid"]) })),
+			{ ordered: false }
+		)*/
+
+		await db.collection("lobs").insertMany(
+			lobs.map((item) => ({ ...item, _id: ObjectId(item._id["$oid"]) })),
 			{ ordered: false }
 		)
 
