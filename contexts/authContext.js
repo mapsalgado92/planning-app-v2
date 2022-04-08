@@ -83,6 +83,26 @@ export const AuthProvider = ({ children }) => {
       .catch((err) => console.log("Something went wrong!"))
   }
 
+  const upsertUser = ({ username, password, permission }) => {
+    const request = {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: authorization(),
+      },
+      body: JSON.stringify({ username, password, permission }),
+    }
+
+    console.log(request)
+
+    fetch("/api/auth/user", request)
+      .then((response) => response.json())
+      .then((data) => {
+        alert(data.message)
+      })
+      .catch((err) => console.log("Something went wrong!"))
+  }
+
   return (
     <AuthContext.Provider
       value={{
@@ -93,6 +113,7 @@ export const AuthProvider = ({ children }) => {
         permission,
         authorization,
         resetPassword,
+        upsertUser,
       }}
     >
       {children}
