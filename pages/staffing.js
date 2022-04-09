@@ -29,11 +29,9 @@ const selectionFields = [
 
 export default function Staffing() {
   const [locked, setLocked] = useState(false)
-
   const [view, setView] = useState({})
-
   const [shrinkage, setShrinkage] = useState([])
-
+  const [volumesAndAHT, setVolumesAndAHT] = useState([])
   const [modal, setModal] = useState({ active: false, channel: null })
 
   const data = useData(["projects", "lobs", "capPlans", "weeks"])
@@ -382,6 +380,41 @@ export default function Staffing() {
             </div>
 
             <br></br>
+
+            <div className="has-text-right">
+              <label className="label">Planned Vol & AHT</label>
+              <CSVUploader
+                removeHandler={() => setVolumesAndAHT([])}
+                loadedHandler={(csv) => setVolumesAndAHT(csv)}
+                label={"channel - volumes - aht"}
+              ></CSVUploader>
+              <button
+                className="button is-small is-link is-rounded"
+                onClick={() => {
+                  handleSubmit({
+                    capPlan: selection.get("capPlan")._id,
+                    week: selection.get("week").code,
+                    planned: volumesAndAHT,
+                  })
+                }}
+                disabled={!selection.get("capPlan") || !locked}
+              >
+                Update Planned Vol & AHT
+              </button>
+              <button
+                className="button is-small is-info is-rounded"
+                onClick={() => {
+                  handleSubmit({
+                    capPlan: selection.get("capPlan")._id,
+                    week: selection.get("week").code,
+                    actual: volumesAndAHT,
+                  })
+                }}
+                disabled={!selection.get("capPlan") || !locked}
+              >
+                Update Actual Vol & AHT
+              </button>
+            </div>
           </div>
         </div>
         <br></br>
