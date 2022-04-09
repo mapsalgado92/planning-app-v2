@@ -382,7 +382,7 @@ export default function Staffing() {
             <br></br>
 
             <div className="has-text-right">
-              <label className="label">Planned Vol & AHT</label>
+              <label className="label">Vol & AHT</label>
               <CSVUploader
                 removeHandler={() => setVolumesAndAHT([])}
                 loadedHandler={(csv) => setVolumesAndAHT(csv)}
