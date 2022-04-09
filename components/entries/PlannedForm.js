@@ -1,4 +1,3 @@
-import { toggleButtonClasses } from "@mui/material"
 import { useState } from "react"
 import { FaLock } from "react-icons/fa"
 import { useAuth } from "../../contexts/authContext"
@@ -46,7 +45,7 @@ const PlannedForm = ({ selection, week, channel, toggle }) => {
       })
       .catch()
 
-    toggle()
+    toggle(null, true)
     return
   }
 

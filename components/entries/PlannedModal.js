@@ -18,7 +18,7 @@ const PlannedModal = ({ active, toggle, selection, channel, week }) => {
 
             <button
               className="delete"
-              onClick={() => toggle()}
+              onClick={() => toggle(null, false)}
               aria-label="close"
             ></button>
           </header>

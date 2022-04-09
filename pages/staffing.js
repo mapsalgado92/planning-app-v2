@@ -65,7 +65,7 @@ export default function Staffing() {
       capacity.generate(selection.get("capPlan"))
       setLocked(true)
     } else {
-      alert("Could not generate capacity!")
+      alert("Incomplete configuration!")
       setLocked(true)
     }
   }
@@ -226,9 +226,8 @@ export default function Staffing() {
     })
   }
 
-  const handleToggleModal = (channel) => {
+  const handleToggleModal = (channel, change) => {
     if (modal.active) {
-      handleToggleLock()
       setModal({
         active: false,
         channel: null,
@@ -238,6 +237,10 @@ export default function Staffing() {
         active: true,
         channel: channel,
       })
+    }
+    if (change) {
+      handleToggleLock()
+      data.refresh()
     }
   }
 
