@@ -386,7 +386,7 @@ export default function Staffing() {
               <CSVUploader
                 removeHandler={() => setVolumesAndAHT([])}
                 loadedHandler={(csv) => setVolumesAndAHT(csv)}
-                label={"channel - volumes - aht"}
+                label={"name - volumes - aht"}
               ></CSVUploader>
               <button
                 className="button is-small is-link is-rounded"
