@@ -10,6 +10,7 @@ import WeekDropdown from "../components/selection/WeekDropdown"
 import useErlang from "../hooks/useErlang"
 
 import CSVUploader from "../components/files/CSVUploader"
+import { CSVDownloader } from "react-papaparse"
 import { useAuth } from "../contexts/authContext"
 import Heatmap from "../components/staffing/Heatmap"
 import PlannedModal from "../components/entries/PlannedModal"
@@ -607,6 +608,42 @@ export default function Staffing() {
                           >
                             Surplus
                           </button>
+                          {/****************************************************************/}
+                          <CSVDownloader
+                            filename={`${channel.name}_${
+                              selection.get("week").code
+                            }_${selection.get("capPlan").name}`}
+                            data={view.requirements
+                              .find((chan) => chan.name === channel.name)
+                              .data.map((item) => ({
+                                name: channel.name,
+                                week: selection.get("week").code,
+                                capPlan: selection.get("capPlan").name,
+                                interval: item.interval,
+                                weekday: item.weekday,
+                                agents: item.net.agents || null,
+                                volumes:
+                                  Math.round(item.net.volumes * 10) / 10 ||
+                                  null,
+                                aht: Math.round(item.net.aht * 10) / 10 || null,
+                                occ:
+                                  Math.round(item.net.occupancy * 1000) /
+                                    1000 || null,
+                                sl:
+                                  Math.round(item.net.sl * 1000) / 1000 || null,
+                                surplus:
+                                  Math.round(item.net.surplus * 10) / 10 ||
+                                  null,
+                              }))}
+                          >
+                            <button
+                              className="button is-link is-small is-rounded"
+                              onClick={() => console.log(view.requirements)}
+                            >
+                              Download
+                            </button>
+                          </CSVDownloader>
+                          {/****************************************************************/}
                         </div>
                       </div>
                       <br></br>
