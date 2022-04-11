@@ -89,8 +89,6 @@ export default function Staffing() {
       })
       .catch((err) => console.log(err))
 
-    setLocked(false)
-
     data.refresh()
   }
 
@@ -608,7 +606,7 @@ export default function Staffing() {
                           >
                             Surplus
                           </button>
-                          {/****************************************************************/}
+
                           <CSVDownloader
                             filename={`Requirements_${channel.name}_${
                               selection.get("week").code
@@ -643,7 +641,6 @@ export default function Staffing() {
                               Download
                             </button>
                           </CSVDownloader>
-                          {/****************************************************************/}
                         </div>
                       </div>
                       <br></br>
