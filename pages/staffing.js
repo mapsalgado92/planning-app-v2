@@ -88,7 +88,7 @@ export default function Staffing() {
         alert(data.message)
       })
       .catch((err) => console.log(err))
-
+    handleToggleLock()
     data.refresh()
   }
 
