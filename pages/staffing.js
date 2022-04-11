@@ -610,7 +610,7 @@ export default function Staffing() {
                           </button>
                           {/****************************************************************/}
                           <CSVDownloader
-                            filename={`${channel.name}_${
+                            filename={`Requirements_${channel.name}_${
                               selection.get("week").code
                             }_${selection.get("capPlan").name}`}
                             data={view.requirements
