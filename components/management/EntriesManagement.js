@@ -82,21 +82,43 @@ const EntriesManagement = ({ data }) => {
   //HANDLERS
   const handleSubmit = async (type) => {
     if (type === "standard") {
-      await fetch(`/api/data/entries/bulk`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: auth.authorization(),
-        },
-        body: JSON.stringify({ payloads: upload }),
-      })
-        .then((response) => response.json())
+      if(upload.length <= 500){
+        await fetch(`/api/data/entries/bulk`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: auth.authorization(),
+          },
+          body: JSON.stringify({ payloads: upload }),
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            console.log(data.message)
+            alert(data.message)
+          })
+          .catch((err) => console.log(err))
+      }
+    } else {
+      let mult = Math.trunc(upload.length/500)
+      for(let i = 0; i <= mult ; i++){
+        fetch(`/api/data/entries/bulk`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: auth.authorization(),
+          },
+          body: JSON.stringify({ payloads: upload.slice(i * 500, (i+1)*500) }),
+        }).then((response) => response.json())
         .then((data) => {
           console.log(data.message)
-          alert(data.message)
+          if(i === mult){
+            alert(`Uploaded ${mult + 1} batches!`)
+          }
         })
         .catch((err) => console.log(err))
+      }
     }
+  
   }
 
   const handleSubmitStaff = (type) => {
