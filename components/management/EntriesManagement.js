@@ -103,8 +103,8 @@ const EntriesManagement = ({ data }) => {
       let mult = Math.trunc(upload.length/500)
       console.log("MULT", upload.length)
       for(let i = 0; i <= mult ; i++){
-        console.log("ONE FETCH: ", i)
-        fetch(`/api/data/entries/bulk`, {
+        console.log("FETCH #", i)
+        await fetch(`/api/data/entries/bulk`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
