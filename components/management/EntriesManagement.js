@@ -81,6 +81,7 @@ const EntriesManagement = ({ data }) => {
 
   //HANDLERS
   const handleSubmit = async (type) => {
+    console.log("UPLOAD LENGTH", upload.length)
     if (type === "standard") {
       if(upload.length <= 500){
         await fetch(`/api/data/entries/bulk`, {
@@ -100,7 +101,9 @@ const EntriesManagement = ({ data }) => {
       }
     } else {
       let mult = Math.trunc(upload.length/500)
+      console.log("MULT", upload.length)
       for(let i = 0; i <= mult ; i++){
+        console.log("ONE FETCH: ", i)
         fetch(`/api/data/entries/bulk`, {
           method: "POST",
           headers: {
