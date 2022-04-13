@@ -99,7 +99,7 @@ const EntriesManagement = ({ data }) => {
           })
           .catch((err) => console.log(err))
       }
-    } else {
+     else {
       let mult = Math.trunc(upload.length/500)
       console.log("MULT", upload.length)
       for(let i = 0; i <= mult ; i++){
@@ -119,7 +119,7 @@ const EntriesManagement = ({ data }) => {
           }
         })
         .catch((err) => console.log(err))
-      }
+      }}
     }
   
   }
