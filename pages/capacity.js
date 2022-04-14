@@ -363,7 +363,7 @@ export default function Capacity() {
             <TotalPercentageChart
               data={capacity.get(weekRange)}
               lines={["expectedAttrition"]}
-              percentages={["attrPercent", "fcAttrition"]}
+              bars={["attrPercent", "fcAttrition"]}
             />
             <br />
             <h3 className="has-text-centered">NH & TRAINING</h3>
