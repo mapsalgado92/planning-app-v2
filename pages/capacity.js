@@ -368,7 +368,7 @@ export default function Capacity() {
             <h3 className="has-text-centered">FORECASTED FTE</h3>
             <TotalPercentageChart
               data={capacity.get(weekRange)}
-              lines={["forecastedFTE", "totalFTE", "expectedFTE"]}
+              lines={["fcFTE", "totalFTE", "expectedFTE"]}
             />
             <br />
             <h3 className="has-text-centered">BUDGET FTE</h3>
