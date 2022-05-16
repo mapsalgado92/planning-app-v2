@@ -3,7 +3,6 @@ query: field1=field1value, field2=field1value, ...
 */
 
 import { connectToDatabase } from "../../../../lib/mongodb"
-import { ObjectId } from "mongodb"
 
 export default async function handler(req, res) {
   const { query, method, body } = req
@@ -18,17 +17,25 @@ export default async function handler(req, res) {
 
   if (method === "GET") {
     if (capPlan) {
-      let output = await db
+      let entries = await db
         .collection("capEntries")
-        .find({ _id: ObjectId(capPlan) })
+        .find({ capPlan: capPlan, lastUpdated: { $exists: 1 } })
         .toArray()
-        .reduce((a, b) =>
-          a.lastUpdated > b.lastUpdated ? a.lastUpdated : b.lastUpdated
-        )
+
+      let lastUpdatedEntry = entries.reduce(
+        (a, b) => (a.lastUpdated > b.lastUpdated ? a : b),
+        {}
+      )
 
       res.status(200).json({
         message: `Retrieved Last Updated!`,
-        data: output.length ? output : null,
+        data: lastUpdatedEntry
+          ? {
+              lastUpdated: lastUpdatedEntry.lastUpdated,
+              updatedBy: lastUpdatedEntry.updatedBy,
+              updateType: lastUpdatedEntry.updateType,
+            }
+          : null,
       })
     } else {
       res.status(200).json({
