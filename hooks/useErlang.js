@@ -140,7 +140,7 @@ const useErlang = () => {
     );
 
     let agents = shrink ? n / (1 - shrink) : n;
-    agents = Math.round(agents / (targets.conc || 1) + 0.5);
+    agents = agents / (targets.conc || 1);
 
     return {
       volumes: vol,
