@@ -1,19 +1,19 @@
-import Head from "next/head"
-import { useState } from "react"
-import useData from "../hooks/useData"
-import useForm from "../hooks/useForm"
-import StructureDropdown from "../components/selection/StructureDropdown"
-import useWeeks from "../hooks/useWeeks"
-import useCapacity from "../hooks/useCapacity"
+import Head from "next/head";
+import { useState } from "react";
+import useData from "../hooks/useData";
+import useForm from "../hooks/useForm";
+import StructureDropdown from "../components/selection/StructureDropdown";
+import useWeeks from "../hooks/useWeeks";
+import useCapacity from "../hooks/useCapacity";
 
-import WeekDropdown from "../components/selection/WeekDropdown"
-import useErlang from "../hooks/useErlang"
+import WeekDropdown from "../components/selection/WeekDropdown";
+import useErlang from "../hooks/useErlang";
 
-import CSVUploader from "../components/files/CSVUploader"
-import { CSVDownloader } from "react-papaparse"
-import { useAuth } from "../contexts/authContext"
-import Heatmap from "../components/staffing/Heatmap"
-import PlannedModal from "../components/entries/PlannedModal"
+import CSVUploader from "../components/files/CSVUploader";
+import { CSVDownloader } from "react-papaparse";
+import { useAuth } from "../contexts/authContext";
+import Heatmap from "../components/staffing/Heatmap";
+import PlannedModal from "../components/entries/PlannedModal";
 
 const selectionFields = [
   { name: "project", default: null, required: true, type: "object", level: 1 },
@@ -26,50 +26,50 @@ const selectionFields = [
     type: "object",
     level: 1,
   },
-]
+];
 
 export default function Staffing() {
-  const [locked, setLocked] = useState(false)
-  const [view, setView] = useState({})
-  const [shrinkage, setShrinkage] = useState([])
-  const [volumesAndAHT, setVolumesAndAHT] = useState([])
-  const [modal, setModal] = useState({ active: false, channel: null })
+  const [locked, setLocked] = useState(false);
+  const [view, setView] = useState({});
+  const [shrinkage, setShrinkage] = useState([]);
+  const [volumesAndAHT, setVolumesAndAHT] = useState([]);
+  const [modal, setModal] = useState({ active: false, channel: null });
 
-  const data = useData(["projects", "lobs", "capPlans", "weeks"])
+  const data = useData(["projects", "lobs", "capPlans", "weeks"]);
 
-  const auth = useAuth()
+  const auth = useAuth();
 
-  const erlang = useErlang({ interval: 900 })
+  const erlang = useErlang({ interval: 900 });
 
-  const capacity = useCapacity()
+  const capacity = useCapacity();
 
   const weeks = useWeeks(
     data.weeks &&
       data.weeks.sort((a, b) =>
         a.firstDate > b.firstDate ? 1 : a.firstDate < b.firstDate ? -1 : 0
       )
-  )
+  );
 
   const selection = useForm({
     fields: selectionFields,
-  })
+  });
 
   const handleToggleLock = () => {
     if (locked) {
-      capacity.reset()
+      capacity.reset();
       setView({
         type: null,
-      })
-      setLocked(false)
+      });
+      setLocked(false);
     } else if (selection.get("capPlan").staffing) {
-      erlang.updateInterval(selection.get("capPlan").staffing.interval || 900)
-      capacity.generate(selection.get("capPlan"))
-      setLocked(true)
+      erlang.updateInterval(selection.get("capPlan").staffing.interval || 900);
+      capacity.generate(selection.get("capPlan"));
+      setLocked(true);
     } else {
-      alert("Incomplete configuration!")
-      setLocked(true)
+      alert("Incomplete configuration!");
+      setLocked(true);
     }
-  }
+  };
 
   //HANDLERS
   const handleSubmit = async (payload) => {
@@ -84,34 +84,34 @@ export default function Staffing() {
     })
       .then((response) => response.json())
       .then((data) => {
-        console.log(data.message)
-        alert(data.message)
+        console.log(data.message);
+        alert(data.message);
       })
-      .catch((err) => console.log(err))
-    handleToggleLock()
-    data.refresh()
-  }
+      .catch((err) => console.log(err));
+    handleToggleLock();
+    data.refresh();
+  };
 
   const handleGenerateRequirements = () => {
-    let extracted = capacity.get([selection.get("week")])[0]
+    let extracted = capacity.get([selection.get("week")])[0];
 
-    let capPlan = selection.get("capPlan")
+    let capPlan = selection.get("capPlan");
 
-    let channels = capPlan.staffing.channels
+    let channels = capPlan.staffing.channels;
 
     if (!channels) {
-      alert("No Valid Channels on Cap Plan")
+      alert("No Valid Channels on Cap Plan");
     }
 
     let requirementsArr = channels.map((channel) => {
       if (channel.live === "TRUE") {
         if (!channel.distros) {
-          alert("Missing Distros in Channel!")
+          alert("Missing Distros in Channel!");
           return {
             ...channel,
             data: [],
             values: {},
-          }
+          };
         }
         let liveRequirements = erlang.generateLiveRequirements({
           distros: channel.distros,
@@ -127,7 +127,7 @@ export default function Staffing() {
           aux: parseFloat(extracted.pAux) / 100 || 0,
           off: parseFloat(extracted.pOff) / 100 || 0,
           absFromTotal: capPlan.staffing.absFromTotal,
-        })
+        });
         return {
           ...channel,
           data: liveRequirements,
@@ -136,7 +136,7 @@ export default function Staffing() {
             capPlan.staffing.fteHours,
             capPlan.staffing.blendOcc
           ),
-        }
+        };
       } else if (channel.live === "FALSE") {
         let boRequirements = erlang.generateBORequirements({
           vol: extracted[`${channel.name}.pVolumes`],
@@ -145,7 +145,7 @@ export default function Staffing() {
           aux: parseFloat(extracted.pAux) / 100 || 0,
           off: parseFloat(extracted.pOff) / 100 || 0,
           absFromTotal: capPlan.staffing.absFromTotal,
-        })
+        });
 
         return {
           ...channel,
@@ -155,17 +155,17 @@ export default function Staffing() {
             capPlan.staffing.fteHours,
             capPlan.staffing.blendOcc
           ),
-        }
+        };
       } else {
-        alert("Invalid Channel Type")
+        alert("Invalid Channel Type");
       }
-    })
+    });
 
     let liveBoltOnData = erlang.boltOnRequirements(
       requirementsArr
         .filter((item) => item.live === "TRUE")
         .map((item) => item.data)
-    )
+    );
 
     let liveTotalRealSurplus =
       requirementsArr
@@ -173,7 +173,7 @@ export default function Staffing() {
         .reduce(
           (partialSum, item) => partialSum + item.values.totalRealSurplus || 0,
           0
-        ) || 0
+        ) || 0;
 
     let offlineTotalReq =
       requirementsArr
@@ -181,67 +181,67 @@ export default function Staffing() {
         .reduce(
           (partialSum, item) => partialSum + item.values.totalReq || 0,
           0
-        ) || 0
+        ) || 0;
 
     let boltOnRequirements = {
       name: "Bolt On",
       live: "TRUE",
       data: liveBoltOnData,
       values: erlang.getWeeklyValues(liveBoltOnData, capPlan.staffing.fteHours),
-    }
+    };
 
-    boltOnRequirements.values.totalReq += offlineTotalReq
-    boltOnRequirements.values.totalRealSurplus = liveTotalRealSurplus
+    boltOnRequirements.values.totalReq += offlineTotalReq;
+    boltOnRequirements.values.totalRealSurplus = liveTotalRealSurplus;
 
     let blendedRequirmenets = {
       name: "Blended",
       live: "TRUE",
       data: liveBoltOnData,
       values: erlang.getWeeklyValues(liveBoltOnData, capPlan.staffing.fteHours),
-    }
+    };
 
     if (offlineTotalReq > liveTotalRealSurplus) {
       blendedRequirmenets.values.totalReq +=
-        offlineTotalReq - liveTotalRealSurplus
-      blendedRequirmenets.values.totalRealSurplus === 0
+        offlineTotalReq - liveTotalRealSurplus;
+      blendedRequirmenets.values.totalRealSurplus === 0;
     } else {
       blendedRequirmenets.values.totalRealSurplus =
-        liveTotalRealSurplus - offlineTotalReq
+        liveTotalRealSurplus - offlineTotalReq;
     }
 
-    blendedRequirmenets.values.totalSurplus = "N/A"
+    blendedRequirmenets.values.totalSurplus = "N/A";
 
     let requirements = [
       ...requirementsArr,
       boltOnRequirements,
       blendedRequirmenets,
-    ]
+    ];
 
     setView({
       requirements: requirements,
       weekly: extracted,
       selected: "agents",
       type: "req",
-    })
-  }
+    });
+  };
 
   const handleToggleModal = (channel, change) => {
     if (modal.active) {
       setModal({
         active: false,
         channel: null,
-      })
+      });
     } else if (channel) {
       setModal({
         active: true,
         channel: channel,
-      })
+      });
     }
     if (change) {
-      handleToggleLock()
-      data.refresh()
+      handleToggleLock();
+      data.refresh();
     }
-  }
+  };
 
   return (
     <>
@@ -271,7 +271,7 @@ export default function Staffing() {
                   disabled={locked}
                   reset={["lob", "capPlan"]}
                   callback={(f) => {
-                    f.resetAll()
+                    f.resetAll();
                   }}
                 />
                 <StructureDropdown
@@ -373,7 +373,7 @@ export default function Staffing() {
                     capPlan: selection.get("capPlan")._id,
                     week: selection.get("week").code,
                     pShrinkage: shrinkage,
-                  })
+                  });
                 }}
                 disabled={!selection.get("capPlan") || !locked}
               >
@@ -397,7 +397,7 @@ export default function Staffing() {
                     capPlan: selection.get("capPlan")._id,
                     week: selection.get("week").code,
                     planned: volumesAndAHT,
-                  })
+                  });
                 }}
                 disabled={!selection.get("capPlan") || !locked}
               >
@@ -410,7 +410,7 @@ export default function Staffing() {
                     capPlan: selection.get("capPlan")._id,
                     week: selection.get("week").code,
                     actual: volumesAndAHT,
-                  })
+                  });
                 }}
                 disabled={!selection.get("capPlan") || !locked}
               >
@@ -647,13 +647,13 @@ export default function Staffing() {
                       <div style={{ maxHeight: "90vh", overflowY: "scroll" }}>
                         <Heatmap
                           xArray={[
-                            { label: "SUN", value: 1 },
-                            { label: "MON", value: 2 },
-                            { label: "TUE", value: 3 },
-                            { label: "WED", value: 4 },
-                            { label: "THU", value: 5 },
-                            { label: "FRI", value: 6 },
-                            { label: "SAT", value: 7 },
+                            { label: "MON", value: 1 },
+                            { label: "TUE", value: 2 },
+                            { label: "WED", value: 3 },
+                            { label: "THU", value: 4 },
+                            { label: "FRI", value: 5 },
+                            { label: "SAT", value: 6 },
+                            { label: "SUN", value: 7 },
                           ]}
                           xField="weekday"
                           yField="interval"
@@ -663,7 +663,7 @@ export default function Staffing() {
                             ),
                           ]}
                           data={channel.data.map((item) => {
-                            return { ...item, ...item.net }
+                            return { ...item, ...item.net };
                           })}
                           value={view.selected}
                         />
@@ -760,5 +760,5 @@ export default function Staffing() {
       <br></br>
       <br></br>
     </>
-  )
+  );
 }
