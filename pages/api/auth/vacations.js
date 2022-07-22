@@ -38,8 +38,8 @@ export default async function handler(req, res) {
         var formBody = []
 
         let details = {
-          Username: "lbarr031",
-          Password: "Margem Sul Hardcore88",
+          Username: query.username,
+          Password: query.password,
           __RequestVerificationToken: html.match(
             /(?<=__RequestVerificationToken" type="hidden" value=")(.*)(?=" \/><)/
           )[0],
@@ -71,7 +71,11 @@ export default async function handler(req, res) {
             cookies = response2.headers.get("set-cookie")
             return response2.text()
           })
-          .then((html) => res.status(200).send(cookies))
+          .then((html) =>
+            html.match("Invalid")
+              ? res.status(200).json({ logged: false, user: null })
+              : res.status(200).json({ logged: true, user: query.username })
+          )
           .catch((err) => {
             console.log(err)
             res.status(500)
